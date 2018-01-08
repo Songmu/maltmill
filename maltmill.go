@@ -40,9 +40,10 @@ func (mm *maltmill) run() error {
 }
 
 func (mm *maltmill) processFile(f string) error {
-	_, err := newFormula(f)
+	fo, err := newFormula(f)
 	if err != nil {
 		return err
 	}
+	fo.update(mm.ghcli)
 	return nil
 }

@@ -1,9 +1,13 @@
 package maltmill
 
 import (
+	"context"
+	"fmt"
 	"io/ioutil"
 	"regexp"
 
+	"github.com/Masterminds/semver"
+	"github.com/google/go-github/github"
 	"github.com/pkg/errors"
 )
 
@@ -91,4 +95,30 @@ func expandStr(str string, m map[string]string) (string, error) {
 		str = reg.ReplaceAllString(str, v)
 	}
 	return str, nil
+}
+
+func (fo *formula) update(ghcli *github.Client) (updated bool, err error) {
+	origVer, err := semver.NewVersion(fo.version)
+	if err != nil {
+		return false, errors.Wrap(err, "invalid original version")
+	}
+
+	rele, resp, err := ghcli.Repositories.GetLatestRelease(context.Background(), fo.owner, fo.repo)
+	if err != nil {
+		return false, err
+	}
+	resp.Body.Close()
+
+	newVer, err := semver.NewVersion(rele.GetTagName())
+	if err != nil {
+		return false, errors.Wrap(err, "invalid original version")
+	}
+	if !origVer.LessThan(newVer) {
+		return false, nil
+	}
+
+	newVerStr := fmt.Sprintf("%d.%d.%d", newVer.Major(), newVer.Minor(), newVer.Patch())
+	fo.version = newVerStr
+
+	return false, nil
 }
