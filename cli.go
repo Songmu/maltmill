@@ -5,7 +5,19 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"runtime"
+
+	"github.com/pkg/errors"
+	gitconfig "github.com/tcnksm/go-gitconfig"
+)
+
+const (
+	defaultGitHubAPIBase = "https://api.github.com"
+)
+
+const (
+	envGitHubToken = "GITHUB_TOKEN"
 )
 
 type cli struct {
@@ -42,10 +54,22 @@ Options:
 `, version, revision, runtime.Version())
 		fs.PrintDefaults()
 	}
+	var token string
+	fs.StringVar(&token, "token", os.Getenv(envGitHubToken), "")
 
 	err := fs.Parse(args)
 	if err != nil {
 		return nil, err
 	}
+	mm.files = fs.Args()
+	if len(mm.files) < 1 {
+		return nil, errors.New("no formula files are specified")
+	}
+
+	if token == "" {
+		token, _ = gitconfig.GithubToken()
+	}
+	mm.ghcli = newGithubClient(token)
+
 	return mm, nil
 }

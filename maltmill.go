@@ -4,6 +4,8 @@ import (
 	"flag"
 	"log"
 	"os"
+
+	"github.com/google/go-github/github"
 )
 
 const (
@@ -25,6 +27,9 @@ func Run(args []string) int {
 }
 
 type maltmill struct {
+	files []string
+
+	ghcli *github.Client
 }
 
 func (mm *maltmill) run() error {
