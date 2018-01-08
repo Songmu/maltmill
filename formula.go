@@ -2,8 +2,11 @@ package maltmill
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"net/http"
 	"regexp"
 
 	"github.com/Masterminds/semver"
@@ -121,4 +124,23 @@ func (fo *formula) update(ghcli *github.Client) (updated bool, err error) {
 	fo.version = newVerStr
 
 	return false, nil
+}
+
+func getSHA256FromURL(u string) (string, error) {
+	req, err := http.NewRequest(http.MethodGet, u, nil)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("User-Agent", fmt.Printf("maltmill/%s", version))
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", errors.Wrapf(err, "getSHA256 failed while request to url: %s", u)
+	}
+
+	h := sha256.New()
+	if _, err := io.Copy(h, resp.Body); err != nil {
+		return "", errors.Wrap(err, "getSHA256 failed while reading response. url: %s", u)
+	}
+
+	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }
