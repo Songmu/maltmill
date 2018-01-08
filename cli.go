@@ -13,10 +13,6 @@ import (
 )
 
 const (
-	defaultGitHubAPIBase = "https://api.github.com"
-)
-
-const (
 	envGitHubToken = "GITHUB_TOKEN"
 )
 
