@@ -44,46 +44,47 @@ func newFormula(f string) (*formula, error) {
 	if m := nameReg.FindStringSubmatch(fo.content); len(m) > 1 {
 		fo.name = m[1]
 	}
-	if m := verReg.FindStringSubmatch(fo.content); len(m) < 4 {
+	m := verReg.FindStringSubmatch(fo.content)
+	if len(m) < 4 {
 		return nil, errors.New("no version detected")
-	} else {
-		fo.version = m[2]
 	}
-	if m := shaReg.FindStringSubmatch(fo.content); len(m) < 4 {
+	fo.version = m[2]
+
+	m = shaReg.FindStringSubmatch(fo.content)
+	if len(m) < 4 {
 		return nil, errors.New("no sha256 detected")
-	} else {
-		fo.sha256 = m[2]
 	}
+	fo.sha256 = m[2]
 
 	info := map[string]string{
 		"name":    fo.name,
 		"version": fo.version,
 	}
 
-	if m := homeReg.FindStringSubmatch(fo.content); len(m) < 2 {
+	m = homeReg.FindStringSubmatch(fo.content)
+	if len(m) < 2 {
 		return nil, errors.New("no homepage detected")
-	} else {
-		h := m[1]
-		fo.homepage, err = expandStr(h, info)
-		if err != nil {
-			return nil, err
-		}
-		if m := parseHomeReg.FindStringSubmatch(fo.homepage); len(m) < 3 {
-			return nil, errors.Errorf("invalid homepage format: %s", fo.homepage)
-		} else {
-			fo.owner = m[1]
-			fo.repo = m[2]
-		}
 	}
+	h := m[1]
+	fo.homepage, err = expandStr(h, info)
+	if err != nil {
+		return nil, err
+	}
+	m = parseHomeReg.FindStringSubmatch(fo.homepage)
+	if len(m) < 3 {
+		return nil, errors.Errorf("invalid homepage format: %s", fo.homepage)
+	}
+	fo.owner = m[1]
+	fo.repo = m[2]
 
-	if m := urlReg.FindStringSubmatch(fo.content); len(m) < 2 {
+	m = urlReg.FindStringSubmatch(fo.content)
+	if len(m) < 2 {
 		return nil, errors.New("no url detected")
-	} else {
-		fo.urlTmpl = m[1]
-		fo.url, err = expandStr(fo.urlTmpl, info)
-		if err != nil {
-			return nil, err
-		}
+	}
+	fo.urlTmpl = m[1]
+	fo.url, err = expandStr(fo.urlTmpl, info)
+	if err != nil {
+		return nil, err
 	}
 
 	return fo, nil

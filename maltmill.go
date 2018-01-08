@@ -62,7 +62,7 @@ func (mm *maltmill) processFile(f string) error {
 		return nil
 	}
 
-	var w io.Writer = mm.writer
+	w := mm.writer
 	if mm.overwrite {
 		f, err := os.Create(f)
 		if err != nil {
