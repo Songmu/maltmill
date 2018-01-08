@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/google/go-github/github"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -38,13 +39,14 @@ type maltmill struct {
 }
 
 func (mm *maltmill) run() error {
+	eg := errgroup.Group{}
 	for _, f := range mm.files {
-		err := mm.processFile(f)
-		if err != nil {
-			return err
-		}
+		f := f
+		eg.Go(func() error {
+			return mm.processFile(f)
+		})
 	}
-	return nil
+	return eg.Wait()
 }
 
 func (mm *maltmill) processFile(f string) error {
