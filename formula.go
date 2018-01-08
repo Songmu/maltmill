@@ -25,10 +25,10 @@ type formula struct {
 
 var (
 	nameReg = regexp.MustCompile(`(?m)^\s+name\s*=\s*['"](.*)["']`)
-	verReg  = regexp.MustCompile(`(?m)^\s+version\s*['"](.*)["']`)
+	verReg  = regexp.MustCompile(`(?m)(^\s+version\s*['"])(.*)(["'])`)
 	homeReg = regexp.MustCompile(`(?m)^\s+homepage\s*['"](.*)["']`)
 	urlReg  = regexp.MustCompile(`(?m)^\s+url\s*['"](.*)["']`)
-	shaReg  = regexp.MustCompile(`(?m)\s+sha256\s*['"](.*)["']`)
+	shaReg  = regexp.MustCompile(`(?m)(\s+sha256\s*['"])(.*)(["'])`)
 
 	parseHomeReg = regexp.MustCompile(`^https://github.com/([^/]+)/([^/]+)`)
 )
@@ -44,15 +44,15 @@ func newFormula(f string) (*formula, error) {
 	if m := nameReg.FindStringSubmatch(fo.content); len(m) > 1 {
 		fo.name = m[1]
 	}
-	if m := verReg.FindStringSubmatch(fo.content); len(m) < 2 {
+	if m := verReg.FindStringSubmatch(fo.content); len(m) < 4 {
 		return nil, errors.New("no version detected")
 	} else {
-		fo.version = m[1]
+		fo.version = m[2]
 	}
-	if m := shaReg.FindStringSubmatch(fo.content); len(m) < 2 {
+	if m := shaReg.FindStringSubmatch(fo.content); len(m) < 4 {
 		return nil, errors.New("no sha256 detected")
 	} else {
-		fo.sha256 = m[1]
+		fo.sha256 = m[2]
 	}
 
 	info := map[string]string{
@@ -108,22 +108,42 @@ func (fo *formula) update(ghcli *github.Client) (updated bool, err error) {
 
 	rele, resp, err := ghcli.Repositories.GetLatestRelease(context.Background(), fo.owner, fo.repo)
 	if err != nil {
-		return false, err
+		return false, errors.Wrapf(err, "update formula failed: %s", fo.fname)
 	}
 	resp.Body.Close()
 
 	newVer, err := semver.NewVersion(rele.GetTagName())
 	if err != nil {
-		return false, errors.Wrap(err, "invalid original version")
+		return false, errors.Wrapf(err, "invalid original version. formula: %s", fo.fname)
 	}
 	if !origVer.LessThan(newVer) {
 		return false, nil
 	}
 
 	newVerStr := fmt.Sprintf("%d.%d.%d", newVer.Major(), newVer.Minor(), newVer.Patch())
+	newURL, err := expandStr(fo.urlTmpl, map[string]string{
+		"name":    fo.name,
+		"version": newVerStr,
+	})
+	if err != nil {
+		return false, errors.Wrapf(err, "faild to upload formula: %s", fo.fname)
+	}
+	newSHA256, err := getSHA256FromURL(newURL)
+	if err != nil {
+		return false, errors.Wrapf(err, "faild to upload formula: %s", fo.fname)
+	}
 	fo.version = newVerStr
+	fo.url = newURL
+	fo.sha256 = newSHA256
+	fo.updateContent()
 
-	return false, nil
+	return true, nil
+}
+
+// update version and sha256
+func (fo *formula) updateContent() {
+	fo.content = verReg.ReplaceAllString(fo.content, fmt.Sprintf(`$1%s$3`, fo.version))
+	fo.content = shaReg.ReplaceAllString(fo.content, fmt.Sprintf(`$1%s$3`, fo.sha256))
 }
 
 func getSHA256FromURL(u string) (string, error) {
