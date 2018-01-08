@@ -31,7 +31,7 @@ build: deps
 
 crossbuild: devel-deps
 	$(eval ver = $(shell gobump show -r))
-	maltmill -pv=v$(ver) -build-ldflags=$(BUILD_LDFLAGS) \
+	goxz -pv=v$(ver) -build-ldflags=$(BUILD_LDFLAGS) \
 	  -d=./dist/v$(ver) ./cmd/maltmill
 
 release:

@@ -63,7 +63,7 @@ Options:
 	}
 
 	if *selfupdate {
-		err := ghselfupdate.Do(vesion)
+		err := ghselfupdate.Do(version)
 		if err != nil {
 			return nil, err
 		}
