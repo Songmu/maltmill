@@ -2,6 +2,8 @@ package maltmill
 
 import (
 	"flag"
+	"fmt"
+	"io"
 	"log"
 	"os"
 
@@ -27,14 +29,20 @@ func Run(args []string) int {
 }
 
 type maltmill struct {
-	files []string
+	files     []string
+	overwrite bool
+
+	writer io.Writer
 
 	ghcli *github.Client
 }
 
 func (mm *maltmill) run() error {
 	for _, f := range mm.files {
-		mm.processFile(f)
+		err := mm.processFile(f)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -44,6 +52,23 @@ func (mm *maltmill) processFile(f string) error {
 	if err != nil {
 		return err
 	}
-	fo.update(mm.ghcli)
-	return nil
+	updated, err := fo.update(mm.ghcli)
+	if err != nil {
+		return err
+	}
+	if mm.overwrite && !updated {
+		return nil
+	}
+
+	var w io.Writer = mm.writer
+	if mm.overwrite {
+		f, err := os.Create(f)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		w = f
+	}
+	_, err = fmt.Fprint(w, fo.content)
+	return err
 }

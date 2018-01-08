@@ -33,7 +33,7 @@ func (cl *cli) run(args []string) error {
 }
 
 func (cl *cli) parseArgs(args []string) (*maltmill, error) {
-	mm := &maltmill{}
+	mm := &maltmill{writer: cl.outStream}
 	fs := flag.NewFlagSet("maltmill", flag.ContinueOnError)
 	fs.SetOutput(cl.errStream)
 	fs.Usage = func() {
@@ -53,6 +53,8 @@ Options:
 	var token string
 	fs.StringVar(&token, "token", os.Getenv(envGitHubToken), "")
 
+	fs.BoolVar(&mm.overwrite, "w", false, "write result to (source) file instead of stdout")
+
 	err := fs.Parse(args)
 	if err != nil {
 		return nil, err
@@ -69,5 +71,3 @@ Options:
 
 	return mm, nil
 }
-
-
