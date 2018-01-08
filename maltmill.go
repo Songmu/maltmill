@@ -43,11 +43,11 @@ func (mm *maltmill) run() error {
 }
 
 var (
-	nameReg = regexp.MustCompile(`^\s+name\s*=\s*['"](.*)["']`)
-	verReg  = regexp.MustCompile(`^\s+version\s*['"](.*)["']`)
-	homeReg = regexp.MustCompile(`^\s+homepage\s*['"](.*)["']`)
-	urlReg  = regexp.MustCompile(`^\s+url\s*['"](.*)["']`)
-	shaReg  = regexp.MustCompile(`\s+sha256\s*['"](.*)["']`)
+	nameReg = regexp.MustCompile(`(?m)^\s+name\s*=\s*['"](.*)["']`)
+	verReg  = regexp.MustCompile(`(?m)^\s+version\s*['"](.*)["']`)
+	homeReg = regexp.MustCompile(`(?m)^\s+homepage\s*['"](.*)["']`)
+	urlReg  = regexp.MustCompile(`(?m)^\s+url\s*['"](.*)["']`)
+	shaReg  = regexp.MustCompile(`(?m)\s+sha256\s*['"](.*)["']`)
 )
 
 func (mm *maltmill) processFile(f string) error {
@@ -63,7 +63,7 @@ func getFormula(f string) (*formula, error) {
 	if err != nil {
 		return nil, err
 	}
-	fo := &formula{}
+	fo := &formula{fname: f}
 	fo.content = string(b)
 
 	if m := nameReg.FindStringSubmatch(fo.content); len(m) > 1 {
