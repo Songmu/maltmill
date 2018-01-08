@@ -157,6 +157,7 @@ func getSHA256FromURL(u string) (string, error) {
 	if err != nil {
 		return "", errors.Wrapf(err, "getSHA256 failed while request to url: %s", u)
 	}
+	defer resp.Body.Close()
 
 	h := sha256.New()
 	if _, err := io.Copy(h, resp.Body); err != nil {
