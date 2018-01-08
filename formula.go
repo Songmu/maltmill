@@ -131,7 +131,7 @@ func getSHA256FromURL(u string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("User-Agent", fmt.Printf("maltmill/%s", version))
+	req.Header.Set("User-Agent", fmt.Sprintf("maltmill/%s", version))
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", errors.Wrapf(err, "getSHA256 failed while request to url: %s", u)
@@ -139,7 +139,7 @@ func getSHA256FromURL(u string) (string, error) {
 
 	h := sha256.New()
 	if _, err := io.Copy(h, resp.Body); err != nil {
-		return "", errors.Wrap(err, "getSHA256 failed while reading response. url: %s", u)
+		return "", errors.Wrapf(err, "getSHA256 failed while reading response. url: %s", u)
 	}
 
 	return fmt.Sprintf("%x", h.Sum(nil)), nil

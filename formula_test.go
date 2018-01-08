@@ -29,3 +29,16 @@ func TestNewFormula(t *testing.T) {
 		t.Errorf("failed to getFormula.\n   out: %#v\nexpect: %#v", *fo, expect)
 	}
 }
+
+func TestGetSHA256FromURL(t *testing.T) {
+	out, err := getSHA256FromURL("https://github.com/Songmu/go-sandbox/releases/download/v0.1.0/go-sandbox_v0.1.0_darwin_amd64.zip")
+
+	if err != nil {
+		t.Errorf("error should be nil but: %s", err)
+	}
+
+	expect := "4b4a1e064c2c3534edadca4f532c712367fd0f22148ae8f994850a0407635c0a"
+	if out != expect {
+		t.Errorf("unexpected sha256.\n   out: %s\nexpect: %s", out, expect)
+	}
+}
