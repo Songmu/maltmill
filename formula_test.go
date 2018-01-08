@@ -5,9 +5,9 @@ import (
 	"testing"
 )
 
-func TestGetFormula(t *testing.T) {
+func TestNewFormula(t *testing.T) {
 	fname := "testdata/goxz.rb"
-	fo, err := getFormula(fname)
+	fo, err := newFormula(fname)
 	if err != nil {
 		t.Errorf("err should be nil but: %s", err)
 	}
