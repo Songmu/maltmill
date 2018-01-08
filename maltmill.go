@@ -106,8 +106,8 @@ func getFormula(f string) (*formula, error) {
 	if m := urlReg.FindStringSubmatch(fo.content); len(m) < 2 {
 		return nil, errors.New("no url detected")
 	} else {
-		u := m[1]
-		fo.url, err = expandStr(u, info)
+		fo.urlTmpl = m[1]
+		fo.url, err = expandStr(fo.urlTmpl, info)
 		if err != nil {
 			return nil, err
 		}
@@ -120,6 +120,7 @@ type formula struct {
 	fname string
 
 	content                              string
+	urlTmpl                              string
 	name, version, homepage, url, sha256 string
 	owner, repo                          string
 }
