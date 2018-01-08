@@ -48,6 +48,8 @@ var (
 	homeReg = regexp.MustCompile(`(?m)^\s+homepage\s*['"](.*)["']`)
 	urlReg  = regexp.MustCompile(`(?m)^\s+url\s*['"](.*)["']`)
 	shaReg  = regexp.MustCompile(`(?m)\s+sha256\s*['"](.*)["']`)
+
+	parseHomeReg = regexp.MustCompile(`^https://github.com/([^/]+)/([^/]+)`)
 )
 
 func (mm *maltmill) processFile(f string) error {
@@ -93,6 +95,12 @@ func getFormula(f string) (*formula, error) {
 		if err != nil {
 			return nil, err
 		}
+		if m := parseHomeReg.FindStringSubmatch(fo.homepage); len(m) < 3 {
+			return nil, errors.Errorf("invalid homepage format: %s", fo.homepage)
+		} else {
+			fo.owner = m[1]
+			fo.repo = m[2]
+		}
 	}
 
 	if m := urlReg.FindStringSubmatch(fo.content); len(m) < 2 {
@@ -113,6 +121,7 @@ type formula struct {
 
 	content                              string
 	name, version, homepage, url, sha256 string
+	owner, repo                          string
 }
 
 func expandStr(str string, m map[string]string) (string, error) {
