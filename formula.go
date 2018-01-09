@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"path"
 	"regexp"
 	"strings"
 
@@ -28,7 +29,7 @@ type formula struct {
 var (
 	nameReg = regexp.MustCompile(`(?m)^\s+name\s*=\s*['"](.*)["']`)
 	verReg  = regexp.MustCompile(`(?m)(^\s+version\s*['"])(.*)(["'])`)
-	urlReg  = regexp.MustCompile(`(?m)^\s+url\s*['"](.*)["']`)
+	urlReg  = regexp.MustCompile(`(?m)(^\s+url\s*['"])(.*)(["'])`)
 	shaReg  = regexp.MustCompile(`(?m)(\s+sha256\s*['"])(.*)(["'])`)
 
 	parseURLReg = regexp.MustCompile(`^https://[^/]*github.com/([^/]+)/([^/]+)`)
@@ -63,10 +64,10 @@ func newFormula(f string) (*formula, error) {
 	}
 
 	m = urlReg.FindStringSubmatch(fo.content)
-	if len(m) < 2 {
+	if len(m) < 4 {
 		return nil, errors.New("no url detected")
 	}
-	fo.urlTmpl = m[1]
+	fo.urlTmpl = m[2]
 	fo.isURLTmpl = strings.Contains(fo.urlTmpl, "#{version}")
 
 	if fo.isURLTmpl {
@@ -120,13 +121,35 @@ func (fo *formula) update(ghcli *github.Client) (updated bool, err error) {
 	}
 
 	newVerStr := fmt.Sprintf("%d.%d.%d", newVer.Major(), newVer.Minor(), newVer.Patch())
-	newURL, err := expandStr(fo.urlTmpl, map[string]string{
-		"name":    fo.name,
-		"version": newVerStr,
-	})
-	if err != nil {
-		return false, errors.Wrapf(err, "faild to upload formula: %s", fo.fname)
+	var newURL string
+	if fo.isURLTmpl {
+		newURL, err = expandStr(fo.urlTmpl, map[string]string{
+			"name":    fo.name,
+			"version": newVerStr,
+		})
+		if err != nil {
+			return false, errors.Wrapf(err, "faild to upload formula: %s", fo.fname)
+		}
+	} else {
+		newURL, err = func() (string, error) {
+			ext := path.Ext(fo.url)
+			for _, asset := range rele.Assets {
+				u := asset.GetBrowserDownloadURL()
+				fname := path.Base(u)
+				// edit distance is better?
+				if strings.Contains(fname, "amd64") &&
+					strings.Contains(fname, "darwin") &&
+					strings.HasSuffix(fname, ext) {
+					return u, nil
+				}
+			}
+			return "", errors.New("no assets found from latest release")
+		}()
+		if err != nil {
+			return false, err
+		}
 	}
+
 	newSHA256, err := getSHA256FromURL(newURL)
 	if err != nil {
 		return false, errors.Wrapf(err, "faild to upload formula: %s", fo.fname)
@@ -143,6 +166,9 @@ func (fo *formula) update(ghcli *github.Client) (updated bool, err error) {
 func (fo *formula) updateContent() {
 	fo.content = verReg.ReplaceAllString(fo.content, fmt.Sprintf(`${1}%s${3}`, fo.version))
 	fo.content = shaReg.ReplaceAllString(fo.content, fmt.Sprintf(`${1}%s${3}`, fo.sha256))
+	if !fo.isURLTmpl {
+		fo.content = urlReg.ReplaceAllString(fo.content, fmt.Sprintf(`${1}%s${3}`, fo.url))
+	}
 }
 
 func getSHA256FromURL(u string) (string, error) {
