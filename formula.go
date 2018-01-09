@@ -29,7 +29,7 @@ type formula struct {
 var (
 	nameReg = regexp.MustCompile(`(?m)^\s+name\s*=\s*['"](.*)["']`)
 	verReg  = regexp.MustCompile(`(?m)(^\s+version\s*['"])(.*)(["'])`)
-	urlReg  = regexp.MustCompile(`(?m)^\s+url\s*['"](.*)["']`)
+	urlReg  = regexp.MustCompile(`(?m)(^\s+url\s*['"])(.*)(["'])`)
 	shaReg  = regexp.MustCompile(`(?m)(\s+sha256\s*['"])(.*)(["'])`)
 
 	parseURLReg = regexp.MustCompile(`^https://[^/]*github.com/([^/]+)/([^/]+)`)
@@ -64,10 +64,10 @@ func newFormula(f string) (*formula, error) {
 	}
 
 	m = urlReg.FindStringSubmatch(fo.content)
-	if len(m) < 2 {
+	if len(m) < 4 {
 		return nil, errors.New("no url detected")
 	}
-	fo.urlTmpl = m[1]
+	fo.urlTmpl = m[2]
 	fo.isURLTmpl = strings.Contains(fo.urlTmpl, "#{version}")
 
 	if fo.isURLTmpl {
@@ -166,6 +166,9 @@ func (fo *formula) update(ghcli *github.Client) (updated bool, err error) {
 func (fo *formula) updateContent() {
 	fo.content = verReg.ReplaceAllString(fo.content, fmt.Sprintf(`${1}%s${3}`, fo.version))
 	fo.content = shaReg.ReplaceAllString(fo.content, fmt.Sprintf(`${1}%s${3}`, fo.sha256))
+	if !fo.isURLTmpl {
+		fo.content = urlReg.ReplaceAllString(fo.content, fmt.Sprintf(`${1}%s${3}`, fo.url))
+	}
 }
 
 func getSHA256FromURL(u string) (string, error) {
