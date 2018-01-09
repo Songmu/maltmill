@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"path"
 	"regexp"
 	"strings"
 
@@ -120,13 +121,35 @@ func (fo *formula) update(ghcli *github.Client) (updated bool, err error) {
 	}
 
 	newVerStr := fmt.Sprintf("%d.%d.%d", newVer.Major(), newVer.Minor(), newVer.Patch())
-	newURL, err := expandStr(fo.urlTmpl, map[string]string{
-		"name":    fo.name,
-		"version": newVerStr,
-	})
-	if err != nil {
-		return false, errors.Wrapf(err, "faild to upload formula: %s", fo.fname)
+	var newURL string
+	if fo.isURLTmpl {
+		newURL, err = expandStr(fo.urlTmpl, map[string]string{
+			"name":    fo.name,
+			"version": newVerStr,
+		})
+		if err != nil {
+			return false, errors.Wrapf(err, "faild to upload formula: %s", fo.fname)
+		}
+	} else {
+		newURL, err = func() (string, error) {
+			ext := path.Ext(fo.url)
+			for _, asset := range rele.Assets {
+				u := asset.GetBrowserDownloadURL()
+				fname := path.Base(u)
+				// edit distance is better?
+				if strings.Contains(fname, "amd64") &&
+					strings.Contains(fname, "darwin") &&
+					strings.HasSuffix(fname, ext) {
+					return u, nil
+				}
+			}
+			return "", errors.New("no assets found from latest release")
+		}()
+		if err != nil {
+			return false, err
+		}
 	}
+
 	newSHA256, err := getSHA256FromURL(newURL)
 	if err != nil {
 		return false, errors.Wrapf(err, "faild to upload formula: %s", fo.fname)
