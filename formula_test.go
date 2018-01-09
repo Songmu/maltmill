@@ -1,6 +1,7 @@
 package maltmill
 
 import (
+	"io/ioutil"
 	"reflect"
 	"testing"
 )
@@ -27,6 +28,25 @@ func TestNewFormula(t *testing.T) {
 
 	if !reflect.DeepEqual(*fo, expect) {
 		t.Errorf("failed to getFormula.\n   out: %#v\nexpect: %#v", *fo, expect)
+	}
+}
+
+func TestUpdateContent(t *testing.T) {
+	fname := "testdata/goxz.rb"
+	fo, err := newFormula(fname)
+	if err != nil {
+		t.Errorf("err should be nil but: %s", err)
+	}
+	fo.version = "0.2.1"
+	fo.sha256 = "11112222"
+
+	fo.updateContent()
+
+	b, _ := ioutil.ReadFile("testdata/goxz_update.rb")
+	expect := string(b)
+
+	if fo.content != expect {
+		t.Errorf("something went wrong.\n  out=%s\nexpect=%s", fo.content, expect)
 	}
 }
 
