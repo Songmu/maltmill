@@ -11,7 +11,7 @@
   branch = "master"
   name = "github.com/Songmu/ghselfupdate"
   packages = ["."]
-  revision = "a9c892a1755f693c7f2ed02da9de54ba0fb257b2"
+  revision = "c679d4f0583a42faa947a1d50d76aa60efe8f3b4"
 
 [[projects]]
   name = "github.com/blang/semver"
