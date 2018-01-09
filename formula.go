@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/Masterminds/semver"
 	"github.com/google/go-github/github"
@@ -17,20 +18,20 @@ import (
 type formula struct {
 	fname string
 
-	content                              string
-	urlTmpl                              string
-	name, version, homepage, url, sha256 string
-	owner, repo                          string
+	content                    string
+	urlTmpl                    string
+	isURLTmpl                  bool
+	name, version, url, sha256 string
+	owner, repo                string
 }
 
 var (
 	nameReg = regexp.MustCompile(`(?m)^\s+name\s*=\s*['"](.*)["']`)
 	verReg  = regexp.MustCompile(`(?m)(^\s+version\s*['"])(.*)(["'])`)
-	homeReg = regexp.MustCompile(`(?m)^\s+homepage\s*['"](.*)["']`)
 	urlReg  = regexp.MustCompile(`(?m)^\s+url\s*['"](.*)["']`)
 	shaReg  = regexp.MustCompile(`(?m)(\s+sha256\s*['"])(.*)(["'])`)
 
-	parseHomeReg = regexp.MustCompile(`^https://github.com/([^/]+)/([^/]+)`)
+	parseURLReg = regexp.MustCompile(`^https://[^/]*github.com/([^/]+)/([^/]+)`)
 )
 
 func newFormula(f string) (*formula, error) {
@@ -61,31 +62,28 @@ func newFormula(f string) (*formula, error) {
 		"version": fo.version,
 	}
 
-	m = homeReg.FindStringSubmatch(fo.content)
-	if len(m) < 2 {
-		return nil, errors.New("no homepage detected")
-	}
-	h := m[1]
-	fo.homepage, err = expandStr(h, info)
-	if err != nil {
-		return nil, err
-	}
-	m = parseHomeReg.FindStringSubmatch(fo.homepage)
-	if len(m) < 3 {
-		return nil, errors.Errorf("invalid homepage format: %s", fo.homepage)
-	}
-	fo.owner = m[1]
-	fo.repo = m[2]
-
 	m = urlReg.FindStringSubmatch(fo.content)
 	if len(m) < 2 {
 		return nil, errors.New("no url detected")
 	}
 	fo.urlTmpl = m[1]
-	fo.url, err = expandStr(fo.urlTmpl, info)
-	if err != nil {
-		return nil, err
+	fo.isURLTmpl = strings.Contains(fo.urlTmpl, "#{version}")
+
+	if fo.isURLTmpl {
+		fo.url, err = expandStr(fo.urlTmpl, info)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		fo.url = fo.urlTmpl
 	}
+
+	m = parseURLReg.FindStringSubmatch(fo.url)
+	if len(m) < 3 {
+		return nil, errors.Errorf("invalid url format: %s", fo.urlTmpl)
+	}
+	fo.owner = m[1]
+	fo.repo = m[2]
 
 	return fo, nil
 }
