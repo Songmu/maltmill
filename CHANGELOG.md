@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.1.1](https://github.com/Songmu/maltmill/compare/v0.1.0...v0.1.1) (2018-01-10)
+
+* [fix] replace URL only one time [#6](https://github.com/Songmu/maltmill/pull/6) ([Songmu](https://github.com/Songmu))
+
 ## [v0.1.0](https://github.com/Songmu/maltmill/compare/v0.0.2...v0.1.0) (2018-01-09)
 
 * update deps for fixing self-update [#5](https://github.com/Songmu/maltmill/pull/5) ([Songmu](https://github.com/Songmu))
