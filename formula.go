@@ -164,11 +164,22 @@ func (fo *formula) update(ghcli *github.Client) (updated bool, err error) {
 
 // update version and sha256
 func (fo *formula) updateContent() {
-	fo.content = verReg.ReplaceAllString(fo.content, fmt.Sprintf(`${1}%s${3}`, fo.version))
-	fo.content = shaReg.ReplaceAllString(fo.content, fmt.Sprintf(`${1}%s${3}`, fo.sha256))
+	fo.content = replaceOne(verReg, fo.content, fmt.Sprintf(`${1}%s${3}`, fo.version))
+	fo.content = replaceOne(shaReg, fo.content, fmt.Sprintf(`${1}%s${3}`, fo.sha256))
 	if !fo.isURLTmpl {
-		fo.content = urlReg.ReplaceAllString(fo.content, fmt.Sprintf(`${1}%s${3}`, fo.url))
+		fo.content = replaceOne(urlReg, fo.content, fmt.Sprintf(`${1}%s${3}`, fo.url))
 	}
+}
+
+func replaceOne(reg *regexp.Regexp, str, replace string) string {
+	replaced := false
+	return reg.ReplaceAllStringFunc(str, func(match string) string {
+		if replaced {
+			return match
+		}
+		replaced = true
+		return reg.ReplaceAllString(match, replace)
+	})
 }
 
 func getSHA256FromURL(u string) (string, error) {
