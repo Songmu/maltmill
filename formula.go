@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/Masterminds/semver"
 	"github.com/google/go-github/github"
@@ -19,6 +20,7 @@ type formula struct {
 
 	content                    string
 	urlTmpl                    string
+	isURLTmpl                  bool
 	name, version, url, sha256 string
 	owner, repo                string
 }
@@ -65,9 +67,15 @@ func newFormula(f string) (*formula, error) {
 		return nil, errors.New("no url detected")
 	}
 	fo.urlTmpl = m[1]
-	fo.url, err = expandStr(fo.urlTmpl, info)
-	if err != nil {
-		return nil, err
+	fo.isURLTmpl = strings.Contains(fo.urlTmpl, "#{version}")
+
+	if fo.isURLTmpl {
+		fo.url, err = expandStr(fo.urlTmpl, info)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		fo.url = fo.urlTmpl
 	}
 
 	m = parseURLReg.FindStringSubmatch(fo.url)

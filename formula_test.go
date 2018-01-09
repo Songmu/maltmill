@@ -14,14 +14,15 @@ func TestNewFormula(t *testing.T) {
 	fo.content = ""
 
 	expect := formula{
-		fname:   fname,
-		name:    "goxz",
-		version: "0.1.0",
-		urlTmpl: "https://github.com/Songmu/#{name}/releases/download/v#{version}/#{name}_v#{version}_darwin_amd64.zip",
-		url:     "https://github.com/Songmu/goxz/releases/download/v0.1.0/goxz_v0.1.0_darwin_amd64.zip",
-		sha256:  "1449899f3e49615b4cbb17493a2f63b88a7489bb4ffb0b0b7a9992e6508cab38",
-		owner:   "Songmu",
-		repo:    "goxz",
+		fname:     fname,
+		name:      "goxz",
+		version:   "0.1.0",
+		urlTmpl:   "https://github.com/Songmu/#{name}/releases/download/v#{version}/#{name}_v#{version}_darwin_amd64.zip",
+		isURLTmpl: true,
+		url:       "https://github.com/Songmu/goxz/releases/download/v0.1.0/goxz_v0.1.0_darwin_amd64.zip",
+		sha256:    "1449899f3e49615b4cbb17493a2f63b88a7489bb4ffb0b0b7a9992e6508cab38",
+		owner:     "Songmu",
+		repo:      "goxz",
 	}
 
 	if !reflect.DeepEqual(*fo, expect) {
