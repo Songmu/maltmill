@@ -10,7 +10,6 @@ import (
 
 	"github.com/Songmu/ghselfupdate"
 	"github.com/pkg/errors"
-	gitconfig "github.com/tcnksm/go-gitconfig"
 )
 
 const envGitHubToken = "GITHUB_TOKEN"
@@ -70,15 +69,56 @@ Options:
 		return nil, errOpt
 	}
 
-	mm.files = fs.Args()
-	if len(mm.files) < 1 {
-		return nil, errors.New("no formula files are specified")
+	restArgs := fs.Args()
+	if len(restArgs) < 1 {
+		return nil, errors.New("no formula files or sub command are specified")
+	}
+	if restArgs[0] == "new" {
+		newArgs := []string{}
+		if token != "" {
+			newArgs = append(newArgs, "-token", token)
+		}
+		if mm.overwrite {
+			newArgs = append(newArgs, "-w")
+		}
+		return cl.parseCreatorArgs(append(newArgs, restArgs[1:]...))
 	}
 
-	if token == "" {
-		token, _ = gitconfig.GithubToken()
-	}
+	mm.files = restArgs
+
 	mm.ghcli = newGithubClient(token)
 
 	return mm, nil
+}
+
+func (cl *cli) parseCreatorArgs(args []string) (runner, error) {
+	cr := &creator{writer: cl.outStream}
+	fs := flag.NewFlagSet("maltmill", flag.ContinueOnError)
+	fs.SetOutput(cl.errStream)
+	fs.Usage = func() {
+		fs.SetOutput(cl.outStream)
+		defer fs.SetOutput(cl.errStream)
+		fmt.Fprintf(cl.outStream, `maltmill - Update homebrew third party formula
+
+Version: %s (rev: %s/%s)
+
+Synopsis:
+    %% maltmill new -w Songmu/ghg
+
+Options:
+`, version, revision, runtime.Version())
+		fs.PrintDefaults()
+	}
+	var token string
+	fs.StringVar(&token, "token", os.Getenv(envGitHubToken), "")
+	fs.BoolVar(&cr.overwrite, "w", false, "write result to (source) file instead of stdout")
+	fs.StringVar(&cr.outFile, "o", "", "file to output")
+
+	err := fs.Parse(args)
+	if err != nil {
+		return nil, err
+	}
+
+	cr.ghcli = newGithubClient(token)
+	return cr, nil
 }
