@@ -33,7 +33,7 @@ func (cl *cli) run(args []string) error {
 	return mm.run()
 }
 
-func (cl *cli) parseArgs(args []string) (*maltmill, error) {
+func (cl *cli) parseArgs(args []string) (runner, error) {
 	mm := &maltmill{writer: cl.outStream}
 	fs := flag.NewFlagSet("maltmill", flag.ContinueOnError)
 	fs.SetOutput(cl.errStream)
