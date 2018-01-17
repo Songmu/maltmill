@@ -118,7 +118,10 @@ Options:
 	if err != nil {
 		return nil, err
 	}
-
+	if len(fs.Args()) < 1 {
+		return nil, errors.New("githut repository isn't specified")
+	}
+	cr.slug = fs.Arg(0)
 	cr.ghcli = newGithubClient(token)
 	return cr, nil
 }
