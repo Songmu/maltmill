@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.2.0](https://github.com/Songmu/maltmill/compare/v0.1.1...v0.2.0) (2018-01-19)
+
+* add new subcommand [#7](https://github.com/Songmu/maltmill/pull/7) ([Songmu](https://github.com/Songmu))
+
 ## [v0.1.1](https://github.com/Songmu/maltmill/compare/v0.1.0...v0.1.1) (2018-01-10)
 
 * [fix] replace URL only one time [#6](https://github.com/Songmu/maltmill/pull/6) ([Songmu](https://github.com/Songmu))
