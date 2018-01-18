@@ -35,7 +35,7 @@ var tmpl = `class {{.CapitalizedName}} < Formula
 end
 `
 
-type NewFormula struct {
+type formulaData struct {
 	Name, CapitalizedName string
 	Version               string
 	Owner, Repo           string
@@ -49,7 +49,7 @@ func (cr *creator) run() error {
 	if len(ownerAndRepo) != 2 {
 		return errors.Errorf("invalid slug: %s", cr.slug)
 	}
-	nf := &NewFormula{
+	nf := &formulaData{
 		Owner:           ownerAndRepo[0],
 		Repo:            ownerAndRepo[1],
 		Name:            ownerAndRepo[1],
@@ -85,7 +85,7 @@ func (cr *creator) run() error {
 		return errors.Wrapf(err, "faild to create new formula")
 	}
 
-	var wtr io.Writer = cr.writer
+	var wtr = cr.writer
 	if cr.overwrite {
 		fname := cr.outFile
 		if fname == "" {
