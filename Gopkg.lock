@@ -29,7 +29,7 @@
   branch = "master"
   name = "github.com/google/go-github"
   packages = ["github"]
-  revision = "218ecc238cf77bbaa2e16a54cada252ec87e7d6e"
+  revision = "922ceac0585d40f97d283d921f872fc50480e06e"
 
 [[projects]]
   branch = "master"
@@ -57,7 +57,7 @@
   branch = "master"
   name = "github.com/rhysd/go-github-selfupdate"
   packages = ["selfupdate"]
-  revision = "cee0f074015effff1b4de3dd8aedc2c9fbc4470d"
+  revision = "54df18b98cc154808329021e785f57567cc162bd"
 
 [[projects]]
   name = "github.com/tcnksm/go-gitconfig"
@@ -83,7 +83,7 @@
     "context",
     "context/ctxhttp"
   ]
-  revision = "434ec0c7fe3742c984919a691b2018a6e9694425"
+  revision = "5ccada7d0a7ba9aeb5d3aca8d3501b4c2a509fec"
 
 [[projects]]
   branch = "master"
@@ -92,7 +92,7 @@
     ".",
     "internal"
   ]
-  revision = "30785a2c434e431ef7c507b54617d6a951d5f2b4"
+  revision = "b28fcf2b08a19742b43084fb40ab78ac6c3d8067"
 
 [[projects]]
   branch = "master"
