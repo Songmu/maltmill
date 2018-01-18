@@ -56,9 +56,9 @@ func (cr *creator) run() error {
 	}
 	nf := &formulaData{
 		Owner:           ownerAndRepo[0],
-		Repo:            repoAndVer[1],
-		Name:            repoAndVer[1],
-		CapitalizedName: strings.Title(repoAndVer[1]),
+		Repo:            repoAndVer[0],
+		Name:            repoAndVer[0],
+		CapitalizedName: strings.Title(repoAndVer[0]),
 	}
 	rele, resp, err := func() (*github.RepositoryRelease, *github.Response, error) {
 		if tag == "" {
