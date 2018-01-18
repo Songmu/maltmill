@@ -52,7 +52,7 @@ Options:
 		fmt.Fprintf(cl.outStream, `
 Commands:
     new            create new formula
-	self-update    binary self update
+    self-update    binary self update
 `)
 	}
 	var token string

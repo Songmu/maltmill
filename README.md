@@ -1,4 +1,4 @@
-maltmill (WIP)
+maltmill
 =======
 
 [![Build Status](https://travis-ci.org/Songmu/maltmill.png?branch=master)][travis]
@@ -11,7 +11,21 @@ maltmill (WIP)
 
 ## Description
 
-tool for updating formula
+create and update homebrew thrid party formulae
+
+## Synopsis
+
+### new
+
+```console
+% maltmill new -w Songmu/maltmill
+```
+
+### update
+
+```console
+% maltmill -w maltmill.rb
+```
 
 ## Author
 
