@@ -51,33 +51,25 @@ Options:
 		fs.PrintDefaults()
 		fmt.Fprintf(cl.outStream, `
 Commands:
-    new     create new formula
+    new            create new formula
+	self-update    binary self update
 `)
 	}
 	var token string
 	fs.StringVar(&token, "token", os.Getenv(envGitHubToken), "github `token")
 	fs.BoolVar(&mm.overwrite, "w", false, "write result to (source) file instead of stdout")
 
-	selfupdate := fs.Bool("self-update", false, "self update")
-
 	err := fs.Parse(args)
 	if err != nil {
 		return nil, err
-	}
-
-	if *selfupdate {
-		err := ghselfupdate.Do(version)
-		if err != nil {
-			return nil, err
-		}
-		return nil, errOpt
 	}
 
 	restArgs := fs.Args()
 	if len(restArgs) < 1 {
 		return nil, errors.New("no formula files or sub command are specified")
 	}
-	if restArgs[0] == "new" {
+	switch restArgs[0] {
+	case "new":
 		newArgs := []string{}
 		if token != "" {
 			newArgs = append(newArgs, "-token", token)
@@ -86,13 +78,20 @@ Commands:
 			newArgs = append(newArgs, "-w")
 		}
 		return cl.parseCreatorArgs(append(newArgs, restArgs[1:]...))
+	case "self-update":
+		return &updator{}, nil
+	default:
+		mm.files = restArgs
+		mm.ghcli = newGithubClient(token)
+		return mm, nil
 	}
+}
 
-	mm.files = restArgs
+type updator struct {
+}
 
-	mm.ghcli = newGithubClient(token)
-
-	return mm, nil
+func (upd *updator) run() error {
+	return ghselfupdate.Do(version)
 }
 
 func (cl *cli) parseCreatorArgs(args []string) (runner, error) {
