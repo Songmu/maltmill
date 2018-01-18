@@ -86,7 +86,7 @@ func (cr *creator) run() error {
 	}
 
 	var wtr = cr.writer
-	if cr.overwrite {
+	if cr.overwrite || cr.outFile != "" {
 		fname := cr.outFile
 		if fname == "" {
 			fname = nf.Name + ".rb"

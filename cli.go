@@ -49,9 +49,13 @@ Synopsis:
 Options:
 `, version, revision, runtime.Version())
 		fs.PrintDefaults()
+		fmt.Fprintf(cl.outStream, `
+Commands:
+    new     create new formula
+`)
 	}
 	var token string
-	fs.StringVar(&token, "token", os.Getenv(envGitHubToken), "")
+	fs.StringVar(&token, "token", os.Getenv(envGitHubToken), "github `token")
 	fs.BoolVar(&mm.overwrite, "w", false, "write result to (source) file instead of stdout")
 
 	selfupdate := fs.Bool("self-update", false, "self update")
@@ -98,21 +102,19 @@ func (cl *cli) parseCreatorArgs(args []string) (runner, error) {
 	fs.Usage = func() {
 		fs.SetOutput(cl.outStream)
 		defer fs.SetOutput(cl.errStream)
-		fmt.Fprintf(cl.outStream, `maltmill - Update homebrew third party formula
-
-Version: %s (rev: %s/%s)
+		fmt.Fprintf(cl.outStream, `maltmill new - create new formula
 
 Synopsis:
     %% maltmill new -w Songmu/ghg
 
 Options:
-`, version, revision, runtime.Version())
+`)
 		fs.PrintDefaults()
 	}
 	var token string
-	fs.StringVar(&token, "token", os.Getenv(envGitHubToken), "")
+	fs.StringVar(&token, "token", os.Getenv(envGitHubToken), "github `token`")
 	fs.BoolVar(&cr.overwrite, "w", false, "write result to (source) file instead of stdout")
-	fs.StringVar(&cr.outFile, "o", "", "file to output")
+	fs.StringVar(&cr.outFile, "o", "", "`file` to output")
 
 	err := fs.Parse(args)
 	if err != nil {
