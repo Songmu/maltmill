@@ -49,13 +49,23 @@ func (cr *creator) run() error {
 	if len(ownerAndRepo) != 2 {
 		return errors.Errorf("invalid slug: %s", cr.slug)
 	}
+	repoAndVer := strings.Split(ownerAndRepo[1], "@")
+	var tag string
+	if len(repoAndVer) > 1 {
+		tag = repoAndVer[1]
+	}
 	nf := &formulaData{
 		Owner:           ownerAndRepo[0],
-		Repo:            ownerAndRepo[1],
-		Name:            ownerAndRepo[1],
-		CapitalizedName: strings.Title(ownerAndRepo[1]),
+		Repo:            repoAndVer[1],
+		Name:            repoAndVer[1],
+		CapitalizedName: strings.Title(repoAndVer[1]),
 	}
-	rele, resp, err := cr.ghcli.Repositories.GetLatestRelease(context.Background(), nf.Owner, nf.Repo)
+	rele, resp, err := func() (*github.RepositoryRelease, *github.Response, error) {
+		if tag == "" {
+			return cr.ghcli.Repositories.GetLatestRelease(context.Background(), nf.Owner, nf.Repo)
+		}
+		return cr.ghcli.Repositories.GetReleaseByTag(context.Background(), nf.Owner, nf.Repo, tag)
+	}()
 	if err != nil {
 		return errors.Wrapf(err, "create new formula failed")
 	}
