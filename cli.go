@@ -39,7 +39,7 @@ func (cl *cli) parseArgs(args []string) (runner, error) {
 	fs.Usage = func() {
 		fs.SetOutput(cl.outStream)
 		defer fs.SetOutput(cl.errStream)
-		fmt.Fprintf(cl.outStream, `maltmill - Update homebrew third party formula
+		fmt.Fprintf(cl.outStream, `maltmill - Update or create homebrew third party formulae
 
 Version: %s (rev: %s/%s)
 
