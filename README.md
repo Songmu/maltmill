@@ -9,9 +9,7 @@ maltmill
 [license]: https://github.com/Songmu/maltmill/blob/master/LICENSE
 [godoc]: https://godoc.org/github.com/Songmu/maltmill
 
-## Description
-
-create and update homebrew thrid party formulae
+create and update Homebrew thrid party Formulae
 
 ## Synopsis
 
@@ -26,6 +24,34 @@ create and update homebrew thrid party formulae
 ```console
 % maltmill -w maltmill.rb
 ```
+
+## Description
+
+The maltmill retrieve artifacts from GitHub Releases and create or update
+the Homebrew Formulae.
+
+## Install
+
+### homebrew
+
+```console
+% brew install Songmu/tap/maltmill
+```
+
+### using [ghg](https://github.com/Songmu/ghg)
+
+```console
+% ghg get Songmu/maltmill
+```
+
+### go get (for using HEAD)
+
+```console
+% go get github.com/Songmu/maltmill/cmd/maltmill
+```
+
+Built binaries are available on GitHub Releases.
+https://github.com/Songmu/maltmill/releases
 
 ## Author
 
