@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.3.0](https://github.com/Songmu/maltmill/compare/v0.2.1...0.3.0) (2019-02-23)
+## [v0.3.0](https://github.com/Songmu/maltmill/compare/v0.2.1...v0.3.0) (2019-02-23)
 
 * update README.md [#10](https://github.com/Songmu/maltmill/pull/10) ([Songmu](https://github.com/Songmu))
 * introduce go modules and Songmu/godzil [#9](https://github.com/Songmu/maltmill/pull/9) ([Songmu](https://github.com/Songmu))
