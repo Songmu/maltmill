@@ -58,7 +58,7 @@ func (cr *creator) run() error {
 		Owner:           ownerAndRepo[0],
 		Repo:            repoAndVer[0],
 		Name:            repoAndVer[0],
-		CapitalizedName: strings.Title(repoAndVer[0]),
+		CapitalizedName: strings.Replace(strings.Title(repoAndVer[0]), "-", "", -1),
 	}
 	rele, resp, err := func() (*github.RepositoryRelease, *github.Response, error) {
 		if tag == "" {
