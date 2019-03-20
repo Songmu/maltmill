@@ -27,7 +27,14 @@ func TestNew(t *testing.T) {
   sha256 '7433c1c1e48eb05601bbf91b0ffb76f5f298773a2b87a584088a9a7562562969'
   head 'https://github.com/Songmu/maltmill.git'
 
+  head do
+    depands_on 'go' => :build
+  end
+
   def install
+    if build.head?
+      system 'make', 'build'
+    end
     bin.install 'maltmill'
   end
 end
