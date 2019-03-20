@@ -29,7 +29,14 @@ var tmpl = `class {{.CapitalizedName}} < Formula
   sha256 '{{.SHA256}}'
   head 'https://github.com/{{.Owner}}/{{.Repo}}.git'
 
+  head do
+    depands_on 'go' => :build
+  end
+
   def install
+    if build.head?
+      system 'make', 'build'
+    end
     bin.install '{{.Name}}'
   end
 end
