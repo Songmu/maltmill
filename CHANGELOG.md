@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.4.0](https://github.com/Songmu/maltmill/compare/v0.3.1...v0.4.0) (2019-03-20)
+
+* update deps [#14](https://github.com/Songmu/maltmill/pull/14) ([Songmu](https://github.com/Songmu))
+* support head build in new formula [#13](https://github.com/Songmu/maltmill/pull/13) ([Songmu](https://github.com/Songmu))
+
 ## [v0.3.1](https://github.com/Songmu/maltmill/compare/v0.3.0...v0.3.1) (2019-03-14)
 
 * update deps [#12](https://github.com/Songmu/maltmill/pull/12) ([Songmu](https://github.com/Songmu))
