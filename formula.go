@@ -106,7 +106,22 @@ func (fo *formula) update(ghcli *github.Client) (updated bool, err error) {
 		return false, errors.Wrap(err, "invalid original version")
 	}
 
-	rele, resp, err := ghcli.Repositories.GetLatestRelease(context.Background(), fo.owner, fo.repo)
+	rele, resp, err := func () (*github.RepositoryRelease, *github.Response, error) {
+		rele, resp, err := ghcli.Repositories.GetLatestRelease(context.Background(), fo.owner, fo.repo)
+		if err == nil {
+			return rele, resp, nil
+		}
+
+		options := &github.ListOptions{Page: 1, PerPage: 1}
+		releases, resp, err := ghcli.Repositories.ListReleases(context.Background(), fo.owner, fo.repo, options)
+		if err != nil {
+			return nil, nil, err
+		}
+		if len(releases) == 0 {
+			return nil, nil, errors.Errorf("not released: %s/%s", fo.owner, fo.repo)
+		}
+		return releases[0], resp, nil
+	}()
 	if err != nil {
 		return false, errors.Wrapf(err, "update formula failed: %s", fo.fname)
 	}

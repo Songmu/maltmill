@@ -69,7 +69,20 @@ func (cr *creator) run() error {
 	}
 	rele, resp, err := func() (*github.RepositoryRelease, *github.Response, error) {
 		if tag == "" {
-			return cr.ghcli.Repositories.GetLatestRelease(context.Background(), nf.Owner, nf.Repo)
+			rele, resp, err := cr.ghcli.Repositories.GetLatestRelease(context.Background(), nf.Owner, nf.Repo)
+			if err == nil {
+				return rele, resp, nil
+			}
+
+			options := &github.ListOptions{Page: 1, PerPage: 1}
+			releases, resp, err := cr.ghcli.Repositories.ListReleases(context.Background(), nf.Owner, nf.Repo, options)
+			if err != nil {
+				return nil, nil, err
+			}
+			if len(releases) == 0 {
+				return nil, nil, errors.Errorf("not released: %s/%s", nf.Owner, nf.Repo)
+			}
+			return releases[0], resp, nil
 		}
 		return cr.ghcli.Repositories.GetReleaseByTag(context.Background(), nf.Owner, nf.Repo, tag)
 	}()
