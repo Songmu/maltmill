@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.4.1](https://github.com/Songmu/maltmill/compare/v0.4.0...v0.4.1) (2019-04-11)
+
+* add CREDITS file for distributing executable [#17](https://github.com/Songmu/maltmill/pull/17) ([Songmu](https://github.com/Songmu))
+* fix typo in formula template [#16](https://github.com/Songmu/maltmill/pull/16) ([Songmu](https://github.com/Songmu))
+
 ## [v0.4.0](https://github.com/Songmu/maltmill/compare/v0.3.1...v0.4.0) (2019-03-20)
 
 * update deps [#14](https://github.com/Songmu/maltmill/pull/14) ([Songmu](https://github.com/Songmu))
