@@ -30,7 +30,7 @@ var tmpl = `class {{.CapitalizedName}} < Formula
   head 'https://github.com/{{.Owner}}/{{.Repo}}.git'
 
   head do
-    depands_on 'go' => :build
+    depends_on 'go' => :build
   end
 
   def install
