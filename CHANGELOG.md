@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.5.1](https://github.com/Songmu/maltmill/compare/v0.5.0...v0.5.1) (2020-07-27)
+
+* Revert "Support linuxbrew." [#19](https://github.com/Songmu/maltmill/pull/19) ([Songmu](https://github.com/Songmu))
+
 ## [v0.5.0](https://github.com/Songmu/maltmill/compare/v0.4.1...v0.5.0) (2020-07-27)
 
 * Support linuxbrew. [#18](https://github.com/Songmu/maltmill/pull/18) ([fujiwara](https://github.com/fujiwara))
