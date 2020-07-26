@@ -23,14 +23,8 @@ func TestNew(t *testing.T) {
 	expect := `class Maltmill < Formula
   version '0.0.1'
   homepage 'https://github.com/Songmu/maltmill'
-  if OS.mac?
-    url "https://github.com/Songmu/maltmill/releases/download/v0.0.1/maltmill_v0.0.1_darwin_amd64.zip"
-    sha256 '7433c1c1e48eb05601bbf91b0ffb76f5f298773a2b87a584088a9a7562562969'
-  end
-  if OS.linux?
-    url "https://github.com/Songmu/maltmill/releases/download/v0.0.1/maltmill_v0.0.1_linux_amd64.tar.gz"
-    sha256 'c77dbf0053ca718172b506886f8cb55deab859d2a50598aa014959bae758e7b4'
-  end
+  url "https://github.com/Songmu/maltmill/releases/download/v0.0.1/maltmill_v0.0.1_darwin_amd64.zip"
+  sha256 '7433c1c1e48eb05601bbf91b0ffb76f5f298773a2b87a584088a9a7562562969'
   head 'https://github.com/Songmu/maltmill.git'
 
   head do
