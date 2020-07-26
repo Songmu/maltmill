@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"path"
-	"regexp"
 	"strings"
 	"text/template"
 
@@ -26,14 +25,8 @@ type creator struct {
 var tmpl = `class {{.CapitalizedName}} < Formula
   version '{{.Version}}'
   homepage 'https://github.com/{{.Owner}}/{{.Repo}}'
-  if OS.mac?
-    url "{{.Downloads.darwin.URL}}"
-    sha256 '{{.Downloads.darwin.SHA256}}'
-  end
-  if OS.linux?
-    url "{{.Downloads.linux.URL}}"
-    sha256 '{{.Downloads.linux.SHA256}}'
-  end
+  url "{{.URL}}"
+  sha256 '{{.SHA256}}'
   head 'https://github.com/{{.Owner}}/{{.Repo}}.git'
 
   head do
@@ -53,17 +46,10 @@ type formulaData struct {
 	Name, CapitalizedName string
 	Version               string
 	Owner, Repo           string
-	Downloads             map[string]formulaDownload
-}
-
-type formulaDownload struct {
-	URL    string
-	SHA256 string
+	SHA256, URL           string
 }
 
 var formulaTmpl = template.Must(template.New("formulaTmpl").Parse(tmpl))
-
-var osNameRe = regexp.MustCompile("(darwin|linux)")
 
 func (cr *creator) run() error {
 	ownerAndRepo := strings.Split(cr.slug, "/")
@@ -97,34 +83,23 @@ func (cr *creator) run() error {
 		return errors.Wrapf(err, "invalid tag name: %s", rele.GetTagName())
 	}
 	nf.Version = fmt.Sprintf("%d.%d.%d", ver.Major(), ver.Minor(), ver.Patch())
-	nf.Downloads, err = func() (map[string]formulaDownload, error) {
-		downloads := make(map[string]formulaDownload)
+	nf.URL, err = func() (string, error) {
 		for _, asset := range rele.Assets {
 			u := asset.GetBrowserDownloadURL()
 			fname := path.Base(u)
-			if !strings.Contains(fname, "amd64") {
-				continue
-			}
-			osName := osNameRe.FindString(fname)
-			if osName == "" {
-				continue
-			}
-			digest, err := getSHA256FromURL(u)
-			if err != nil {
-				return nil, err
-			}
-			downloads[osName] = formulaDownload{
-				URL:    u,
-				SHA256: digest,
+			if strings.Contains(fname, "amd64") &&
+				strings.Contains(fname, "darwin") {
+				return u, nil
 			}
 		}
-		if len(downloads) == 0 {
-			return nil, errors.New("no assets found from latest release")
-		}
-		return downloads, nil
+		return "", errors.New("no assets found from latest release")
 	}()
 	if err != nil {
 		return err
+	}
+	nf.SHA256, err = getSHA256FromURL(nf.URL)
+	if err != nil {
+		return errors.Wrapf(err, "faild to create new formula")
 	}
 
 	var wtr = cr.writer
