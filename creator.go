@@ -109,13 +109,13 @@ func (cr *creator) run() error {
 			if osName == "" {
 				continue
 			}
-			sha256, err := getSHA256FromURL(u)
+			digest, err := getSHA256FromURL(u)
 			if err != nil {
 				return nil, err
 			}
 			downloads[osName] = formulaDownload{
 				URL:    u,
-				SHA256: sha256,
+				SHA256: digest,
 			}
 		}
 		if len(downloads) == 0 {
