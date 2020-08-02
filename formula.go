@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"path"
 	"regexp"
 	"strings"
 
@@ -19,18 +18,15 @@ import (
 type formula struct {
 	fname string
 
-	content                    string
-	urlTmpl                    string
-	isURLTmpl                  bool
-	name, version, url, sha256 string
-	owner, repo                string
+	content       string
+	name, version string
+	owner, repo   string
 }
 
 var (
 	nameReg = regexp.MustCompile(`(?m)^\s+name\s*=\s*['"](.*)["']`)
 	verReg  = regexp.MustCompile(`(?m)(^\s+version\s*['"])(.*)(["'])`)
 	urlReg  = regexp.MustCompile(`(?m)(^\s+url\s*['"])(.*)(["'])`)
-	shaReg  = regexp.MustCompile(`(?m)(\s+sha256\s*['"])(.*)(["'])`)
 
 	parseURLReg = regexp.MustCompile(`^https://[^/]*github.com/([^/]+)/([^/]+)`)
 )
@@ -52,12 +48,6 @@ func newFormula(f string) (*formula, error) {
 	}
 	fo.version = m[2]
 
-	m = shaReg.FindStringSubmatch(fo.content)
-	if len(m) < 4 {
-		return nil, errors.New("no sha256 detected")
-	}
-	fo.sha256 = m[2]
-
 	info := map[string]string{
 		"name":    fo.name,
 		"version": fo.version,
@@ -67,21 +57,17 @@ func newFormula(f string) (*formula, error) {
 	if len(m) < 4 {
 		return nil, errors.New("no url detected")
 	}
-	fo.urlTmpl = m[2]
-	fo.isURLTmpl = strings.Contains(fo.urlTmpl, "#{version}")
-
-	if fo.isURLTmpl {
-		fo.url, err = expandStr(fo.urlTmpl, info)
+	url := m[2]
+	if strings.Contains(url, "#{version}") {
+		url, err = expandStr(url, info)
 		if err != nil {
 			return nil, err
 		}
-	} else {
-		fo.url = fo.urlTmpl
 	}
 
-	m = parseURLReg.FindStringSubmatch(fo.url)
+	m = parseURLReg.FindStringSubmatch(url)
 	if len(m) < 3 {
-		return nil, errors.Errorf("invalid url format: %s", fo.urlTmpl)
+		return nil, errors.Errorf("invalid url format: %s", url)
 	}
 	fo.owner = m[1]
 	fo.repo = m[2]
@@ -106,7 +92,8 @@ func (fo *formula) update(ghcli *github.Client) (updated bool, err error) {
 		return false, errors.Wrap(err, "invalid original version")
 	}
 
-	rele, resp, err := ghcli.Repositories.GetLatestRelease(context.Background(), fo.owner, fo.repo)
+	ctx := context.Background()
+	rele, resp, err := ghcli.Repositories.GetLatestRelease(ctx, fo.owner, fo.repo)
 	if err != nil {
 		return false, errors.Wrapf(err, "update formula failed: %s", fo.fname)
 	}
@@ -120,55 +107,44 @@ func (fo *formula) update(ghcli *github.Client) (updated bool, err error) {
 		return false, nil
 	}
 
-	newVerStr := fmt.Sprintf("%d.%d.%d", newVer.Major(), newVer.Minor(), newVer.Patch())
-	var newURL string
-	if fo.isURLTmpl {
-		newURL, err = expandStr(fo.urlTmpl, map[string]string{
-			"name":    fo.name,
-			"version": newVerStr,
-		})
-		if err != nil {
-			return false, errors.Wrapf(err, "faild to upload formula: %s", fo.fname)
-		}
-	} else {
-		newURL, err = func() (string, error) {
-			ext := path.Ext(fo.url)
-			for _, asset := range rele.Assets {
-				u := asset.GetBrowserDownloadURL()
-				fname := path.Base(u)
-				// edit distance is better?
-				if strings.Contains(fname, "amd64") &&
-					strings.Contains(fname, "darwin") &&
-					strings.HasSuffix(fname, ext) {
-					return u, nil
-				}
-			}
-			return "", errors.New("no assets found from latest release")
-		}()
-		if err != nil {
-			return false, err
-		}
+	fromTag := fo.version
+	if strings.HasPrefix("v", rele.GetTagName()) && !strings.HasPrefix("v", fromTag) {
+		fromTag = "v" + fromTag
+	}
+	fromRele, resp, err := ghcli.Repositories.GetReleaseByTag(ctx, fo.owner, fo.repo, fromTag)
+	if err != nil {
+		return false, errors.Wrapf(err, "update formula failed: %s", fo.fname)
 	}
 
-	newSHA256, err := getSHA256FromURL(newURL)
+	newVerStr := fmt.Sprintf("%d.%d.%d", newVer.Major(), newVer.Minor(), newVer.Patch())
+	fromDownloads, err := getDownloads(fromRele.Assets)
 	if err != nil {
-		return false, errors.Wrapf(err, "faild to upload formula: %s", fo.fname)
+		return false, errors.Wrapf(err, "update formula failed: %s", fo.fname)
 	}
+	downloads, err := getDownloads(rele.Assets)
+	if err != nil {
+		return false, errors.Wrapf(err, "update formula failed: %s", fo.fname)
+	}
+
 	fo.version = newVerStr
-	fo.url = newURL
-	fo.sha256 = newSHA256
-	fo.updateContent()
+	fo.updateContent(fromDownloads, downloads)
 
 	return true, nil
 }
 
-// update version and sha256
-func (fo *formula) updateContent() {
-	fo.content = replaceOne(verReg, fo.content, fmt.Sprintf(`${1}%s${3}`, fo.version))
-	fo.content = replaceOne(shaReg, fo.content, fmt.Sprintf(`${1}%s${3}`, fo.sha256))
-	if !fo.isURLTmpl {
-		fo.content = replaceOne(urlReg, fo.content, fmt.Sprintf(`${1}%s${3}`, fo.url))
+func (fo *formula) updateContent(from, to []formulaDownload) {
+	var replacements []string
+	for _, fromD := range from {
+		for _, toD := range to {
+			if fromD.Arch == toD.Arch && fromD.OS == toD.OS {
+				replacements = append(replacements, fromD.URL, toD.URL, fromD.SHA256, toD.SHA256)
+			}
+		}
 	}
+
+	r := strings.NewReplacer(replacements...)
+	fo.content = r.Replace(fo.content)
+	fo.content = replaceOne(verReg, fo.content, fmt.Sprintf(`${1}%s${3}`, fo.version))
 }
 
 func replaceOne(reg *regexp.Regexp, str, replace string) string {
