@@ -35,36 +35,68 @@ func TestUpdateContent(t *testing.T) {
 		fromDownloads []formulaDownload
 		downloads     []formulaDownload
 		expectFile    string
-	}{
-		{
-			name:    "template url",
-			fname:   "testdata/goxz.rb",
-			version: "0.2.1",
-			fromDownloads: []formulaDownload{{
-				SHA256: "1449899f3e49615b4cbb17493a2f63b88a7489bb4ffb0b0b7a9992e6508cab38",
-				URL:    "https://github.com/Songmu/goxz/releases/download/v0.1.0/goxz_v0.1.0_darwin_amd64.zip",
-			}},
-			downloads: []formulaDownload{{
-				SHA256: "11112222",
-				URL:    "https://github.com/Songmu/goxz/releases/download/v0.2.1/goxz_v0.2.1_darwin_amd64.zip",
-			}},
-			expectFile: "testdata/goxz_update.rb",
-		},
-		{
-			name:    "raw url",
-			fname:   "testdata/goxz2.rb",
-			version: "0.3.3",
-			fromDownloads: []formulaDownload{{
-				SHA256: "1449899f3e49615b4cbb17493a2f63b88a7489bb4ffb0b0b7a9992e6508cab38",
-				URL:    "https://github.com/Songmu/goxz/releases/download/v0.1.0/goxz_v0.1.0_darwin_amd64.zip",
-			}},
-			downloads: []formulaDownload{{
-				SHA256: "11113333",
-				URL:    "https://github.com/Songmu/goxz/releases/download/v0.3.3/goxz_v0.3.3_darwin_amd64.zip",
-			}},
-			expectFile: "testdata/goxz2_update.rb",
-		},
-	}
+	}{{
+		name:    "template url",
+		fname:   "testdata/goxz.rb",
+		version: "0.2.1",
+		fromDownloads: []formulaDownload{{
+			SHA256: "1449899f3e49615b4cbb17493a2f63b88a7489bb4ffb0b0b7a9992e6508cab38",
+			URL:    "https://github.com/Songmu/goxz/releases/download/v0.1.0/goxz_v0.1.0_darwin_amd64.zip",
+			OS:     "darwin",
+			Arch:   "amd64",
+		}},
+		downloads: []formulaDownload{{
+			SHA256: "11112222",
+			URL:    "https://github.com/Songmu/goxz/releases/download/v0.2.1/goxz_v0.2.1_darwin_amd64.zip",
+			OS:     "darwin",
+			Arch:   "amd64",
+		}},
+		expectFile: "testdata/goxz_update.rb",
+	}, {
+		name:    "raw url",
+		fname:   "testdata/goxz2.rb",
+		version: "0.3.3",
+		fromDownloads: []formulaDownload{{
+			SHA256: "1449899f3e49615b4cbb17493a2f63b88a7489bb4ffb0b0b7a9992e6508cab38",
+			URL:    "https://github.com/Songmu/goxz/releases/download/v0.1.0/goxz_v0.1.0_darwin_amd64.zip",
+			OS:     "darwin",
+			Arch:   "amd64",
+		}},
+		downloads: []formulaDownload{{
+			SHA256: "11113333",
+			URL:    "https://github.com/Songmu/goxz/releases/download/v0.3.3/goxz_v0.3.3_darwin_amd64.zip",
+			OS:     "darwin",
+			Arch:   "amd64",
+		}},
+		expectFile: "testdata/goxz2_update.rb",
+	}, {
+		name:    "with linux",
+		fname:   "testdata/kibelasync.rb",
+		version: "0.1.1",
+		fromDownloads: []formulaDownload{{
+			SHA256: "758f07a1073c6924a4c09b167b413b915e623c342920092d655a7eb21cdd443b",
+			URL:    "https://github.com/Songmu/kibelasync/releases/download/v0.1.0/kibelasync_v0.1.0_darwin_amd64.zip",
+			OS:     "darwin",
+			Arch:   "amd64",
+		}, {
+			SHA256: "bc92df3d0cb9aafd0a6449726ffdfd4dca348b1896d90a4ac4043561a59ec71d",
+			URL:    "https://github.com/Songmu/kibelasync/releases/download/v0.1.0/kibelasync_v0.1.0_linux_amd64.tar.gz",
+			OS:     "linux",
+			Arch:   "amd64",
+		}},
+		downloads: []formulaDownload{{
+			SHA256: "11118888",
+			URL:    "https://github.com/Songmu/kibelasync/releases/download/v0.1.1/kibelasync_v0.1.1_darwin_amd64.zip",
+			OS:     "darwin",
+			Arch:   "amd64",
+		}, {
+			SHA256: "11119999",
+			URL:    "https://github.com/Songmu/kibelasync/releases/download/v0.1.1/kibelasync_v0.1.1_linux_amd64.tar.gz",
+			OS:     "linux",
+			Arch:   "amd64",
+		}},
+		expectFile: "testdata/kibelasync_update.rb",
+	}}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {

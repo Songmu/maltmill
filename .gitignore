@@ -1,6 +1,5 @@
 .*
 !.gitignore
 !.travis.yml
-goxz/
 dist/
-vendor/
+maltmill
