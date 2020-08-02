@@ -13,13 +13,14 @@ deps:
 
 .PHONY: devel-deps
 devel-deps: deps
-	GO111MODULE=off go get ${u} \
-	  golang.org/x/lint/golint                  \
-	  github.com/mattn/goveralls                \
-	  github.com/Songmu/godzil/cmd/godzil       \
-	  github.com/Songmu/gocredits/cmd/gocredits \
-	  github.com/Songmu/goxz/cmd/goxz           \
-	  github.com/tcnksm/ghr
+	sh -c '\
+	tmpdir=$$(mktemp -d); \
+	cd $$tmpdir; \
+	go get ${u} \
+	  golang.org/x/lint/golint            \
+	  github.com/Songmu/godzil/cmd/godzil \
+	  github.com/tcnksm/ghr; \
+	rm -rf $$tmpdir'
 
 .PHONY: deps
 test: deps
@@ -27,32 +28,24 @@ test: deps
 
 .PHONY: lint
 lint: devel-deps
-	go vet
 	golint -set_exit_status
-
-.PHONY: cover
-cover: devel-deps
-	goveralls
 
 .PHONY: build
 build: deps
 	go build -ldflags=$(BUILD_LDFLAGS) ./cmd/maltmill
 
-.PHONY: bump
-bump: devel-deps
+.PHONY: release
+release: devel-deps
 	godzil release
 
 CREDITS: devel-deps go.sum
-	gocredits -w
+	godzil credits -w
 
 .PHONY: crossbuild
 crossbuild: CREDITS
-	goxz -pv=v$(VERSION) -build-ldflags=$(BUILD_LDFLAGS) \
+	godzil crossbuild -pv=v$(VERSION) -build-ldflags=$(BUILD_LDFLAGS) \
 	  -d=./dist/v$(VERSION) ./cmd/*
 
 .PHONY: upload
 upload:
 	ghr v$(VERSION) dist/v$(VERSION)
-
-.PHONY: release
-release: bump crossbuild upload
