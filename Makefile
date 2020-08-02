@@ -42,7 +42,7 @@ CREDITS: devel-deps go.sum
 	godzil credits -w
 
 .PHONY: crossbuild
-crossbuild: CREDITS
+crossbuild: devel-deps
 	godzil crossbuild -pv=v$(VERSION) -build-ldflags=$(BUILD_LDFLAGS) \
 	  -d=./dist/v$(VERSION) ./cmd/*
 
