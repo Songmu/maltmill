@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.5.4](https://github.com/Songmu/maltmill/compare/v0.5.3...v0.5.4) (2020-08-02)
+
+* log when new formula created [#25](https://github.com/Songmu/maltmill/pull/25) ([Songmu](https://github.com/Songmu))
+* contextize and refactoring [#24](https://github.com/Songmu/maltmill/pull/24) ([Songmu](https://github.com/Songmu))
+* introduce GitHub Actions [#23](https://github.com/Songmu/maltmill/pull/23) ([Songmu](https://github.com/Songmu))
+
 ## [v0.5.3](https://github.com/Songmu/maltmill/compare/v0.5.2...v0.5.3) (2020-08-02)
 
 * [bugfix] fix update process [#22](https://github.com/Songmu/maltmill/pull/22) ([Songmu](https://github.com/Songmu))
