@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path"
 	"regexp"
@@ -98,7 +99,7 @@ func getDownloads(assets []github.ReleaseAsset) ([]formulaDownload, error) {
 	return downloads, nil
 }
 
-func (cr *cmdNew) run(ctx context.Context) error {
+func (cr *cmdNew) run(ctx context.Context) (err error) {
 	ownerAndRepo := strings.Split(cr.slug, "/")
 	if len(ownerAndRepo) != 2 {
 		return errors.Errorf("invalid slug: %s", cr.slug)
@@ -144,6 +145,11 @@ func (cr *cmdNew) run(ctx context.Context) error {
 		if fname == "" {
 			fname = nf.Name + ".rb"
 		}
+		defer func() {
+			if err == nil {
+				log.Printf("created %q\n", fname)
+			}
+		}()
 		f, err := os.Create(fname)
 		if err != nil {
 			return err
