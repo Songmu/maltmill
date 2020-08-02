@@ -115,6 +115,7 @@ func (fo *formula) update(ghcli *github.Client) (updated bool, err error) {
 	if err != nil {
 		return false, errors.Wrapf(err, "update formula failed: %s", fo.fname)
 	}
+	resp.Body.Close()
 
 	newVerStr := fmt.Sprintf("%d.%d.%d", newVer.Major(), newVer.Minor(), newVer.Patch())
 	fromDownloads, err := getDownloads(fromRele.Assets)
