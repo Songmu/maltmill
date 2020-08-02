@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.5.5](https://github.com/Songmu/maltmill/compare/v0.5.4...v0.5.5) (2020-08-03)
+
+* drop self-update feature [#26](https://github.com/Songmu/maltmill/pull/26) ([Songmu](https://github.com/Songmu))
+
 ## [v0.5.4](https://github.com/Songmu/maltmill/compare/v0.5.3...v0.5.4) (2020-08-02)
 
 * log when new formula created [#25](https://github.com/Songmu/maltmill/pull/25) ([Songmu](https://github.com/Songmu))
