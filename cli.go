@@ -9,7 +9,6 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/Songmu/ghselfupdate"
 	"github.com/pkg/errors"
 )
 
@@ -34,7 +33,7 @@ func (cl *cli) run(ctx context.Context, args []string) error {
 }
 
 func (cl *cli) parseArgs(ctx context.Context, args []string) (runner, error) {
-	mm := &maltmill{writer: cl.outStream}
+	mm := &cmdMaltmill{writer: cl.outStream}
 	fs := flag.NewFlagSet("maltmill", flag.ContinueOnError)
 	fs.SetOutput(cl.errStream)
 	fs.Usage = func() {
@@ -78,9 +77,9 @@ Commands:
 		if mm.overwrite {
 			newArgs = append(newArgs, "-w")
 		}
-		return cl.parseCreatorArgs(ctx, append(newArgs, restArgs[1:]...))
+		return cl.parseCmdNewArgs(ctx, append(newArgs, restArgs[1:]...))
 	case "self-update":
-		return &updator{}, nil
+		return &cmdSelfUpdate{}, nil
 	default:
 		mm.files = restArgs
 		mm.ghcli = newGithubClient(ctx, token)
@@ -88,15 +87,8 @@ Commands:
 	}
 }
 
-type updator struct {
-}
-
-func (upd *updator) run(ctx context.Context) error {
-	return ghselfupdate.Do(version)
-}
-
-func (cl *cli) parseCreatorArgs(ctx context.Context, args []string) (runner, error) {
-	cr := &creator{writer: cl.outStream}
+func (cl *cli) parseCmdNewArgs(ctx context.Context, args []string) (runner, error) {
+	cr := &cmdNew{writer: cl.outStream}
 	fs := flag.NewFlagSet("maltmill", flag.ContinueOnError)
 	fs.SetOutput(cl.errStream)
 	fs.Usage = func() {
