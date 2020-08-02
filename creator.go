@@ -59,14 +59,16 @@ type formulaData struct {
 type formulaDownload struct {
 	URL    string
 	SHA256 string
+	OS     string
+	Arch   string
 }
 
 var formulaTmpl = template.Must(template.New("formulaTmpl").Parse(tmpl))
 
 var osNameRe = regexp.MustCompile("(darwin|linux)")
 
-func getDownloads(assets []github.ReleaseAsset) (map[string]formulaDownload, error) {
-	downloads := make(map[string]formulaDownload)
+func getDownloads(assets []github.ReleaseAsset) ([]formulaDownload, error) {
+	var downloads []formulaDownload
 	for _, asset := range assets {
 		u := asset.GetBrowserDownloadURL()
 		fname := path.Base(u)
@@ -81,10 +83,12 @@ func getDownloads(assets []github.ReleaseAsset) (map[string]formulaDownload, err
 		if err != nil {
 			return nil, err
 		}
-		downloads[osName] = formulaDownload{
+		downloads = append(downloads, formulaDownload{
 			URL:    u,
 			SHA256: digest,
-		}
+			OS:     osName,
+			Arch:   "amd64",
+		})
 	}
 	if len(downloads) == 0 {
 		return nil, errors.New("no assets found")
@@ -124,11 +128,14 @@ func (cr *creator) run() error {
 		return errors.Wrapf(err, "invalid tag name: %s", rele.GetTagName())
 	}
 	nf.Version = fmt.Sprintf("%d.%d.%d", ver.Major(), ver.Minor(), ver.Patch())
-	nf.Downloads, err = getDownloads(rele.Assets)
+	downloads, err := getDownloads(rele.Assets)
 	if err != nil {
 		return err
 	}
-
+	nf.Downloads = make(map[string]formulaDownload, len(downloads))
+	for _, d := range downloads {
+		nf.Downloads[d.OS] = d
+	}
 	var wtr = cr.writer
 	if cr.overwrite || cr.outFile != "" {
 		fname := cr.outFile

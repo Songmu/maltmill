@@ -33,25 +33,39 @@ func TestNewFormula(t *testing.T) {
 
 func TestUpdateContent(t *testing.T) {
 	testCases := []struct {
-		name            string
-		fname           string
-		version, sha256 string
-		url             string
-		expectFile      string
+		name          string
+		fname         string
+		version       string
+		fromDownloads []formulaDownload
+		downloads     []formulaDownload
+		expectFile    string
 	}{
 		{
-			name:       "template url",
-			fname:      "testdata/goxz.rb",
-			version:    "0.2.1",
-			sha256:     "11112222",
+			name:    "template url",
+			fname:   "testdata/goxz.rb",
+			version: "0.2.1",
+			fromDownloads: []formulaDownload{{
+				SHA256: "1449899f3e49615b4cbb17493a2f63b88a7489bb4ffb0b0b7a9992e6508cab38",
+				URL:    "https://github.com/Songmu/goxz/releases/download/v0.1.0/goxz_v0.1.0_darwin_amd64.zip",
+			}},
+			downloads: []formulaDownload{{
+				SHA256: "11112222",
+				URL:    "https://github.com/Songmu/goxz/releases/download/v0.2.1/goxz_v0.2.1_darwin_amd64.zip",
+			}},
 			expectFile: "testdata/goxz_update.rb",
 		},
 		{
-			name:       "raw url",
-			fname:      "testdata/goxz2.rb",
-			version:    "0.3.3",
-			sha256:     "11113333",
-			url:        "https://github.com/Songmu/goxz/releases/download/v0.3.3/goxz_v0.3.3_darwin_amd64.zip",
+			name:    "raw url",
+			fname:   "testdata/goxz2.rb",
+			version: "0.3.3",
+			fromDownloads: []formulaDownload{{
+				SHA256: "1449899f3e49615b4cbb17493a2f63b88a7489bb4ffb0b0b7a9992e6508cab38",
+				URL:    "https://github.com/Songmu/goxz/releases/download/v0.1.0/goxz_v0.1.0_darwin_amd64.zip",
+			}},
+			downloads: []formulaDownload{{
+				SHA256: "11113333",
+				URL:    "https://github.com/Songmu/goxz/releases/download/v0.3.3/goxz_v0.3.3_darwin_amd64.zip",
+			}},
 			expectFile: "testdata/goxz2_update.rb",
 		},
 	}
@@ -63,11 +77,7 @@ func TestUpdateContent(t *testing.T) {
 				t.Errorf("err should be nil but: %s", err)
 			}
 			fo.version = tc.version
-			fo.sha256 = tc.sha256
-			if tc.url != "" {
-				fo.url = tc.url
-			}
-			fo.updateContent()
+			fo.updateContent(tc.fromDownloads, tc.downloads)
 
 			b, _ := ioutil.ReadFile(tc.expectFile)
 			expect := string(b)
