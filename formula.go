@@ -108,7 +108,7 @@ func (fo *formula) update(ghcli *github.Client) (updated bool, err error) {
 	}
 
 	fromTag := fo.version
-	if strings.HasPrefix("v", rele.GetTagName()) && !strings.HasPrefix("v", fromTag) {
+	if strings.HasPrefix(rele.GetTagName(), "v") && !strings.HasPrefix(fromTag, "v") {
 		fromTag = "v" + fromTag
 	}
 	fromRele, resp, err := ghcli.Repositories.GetReleaseByTag(ctx, fo.owner, fo.repo, fromTag)
