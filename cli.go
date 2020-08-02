@@ -52,7 +52,6 @@ Options:
 		fmt.Fprintf(cl.outStream, `
 Commands:
     new            create new formula
-    self-update    binary self update
 `)
 	}
 	var token string
@@ -78,8 +77,6 @@ Commands:
 			newArgs = append(newArgs, "-w")
 		}
 		return cl.parseCmdNewArgs(ctx, append(newArgs, restArgs[1:]...))
-	case "self-update":
-		return &cmdSelfUpdate{}, nil
 	default:
 		mm.files = restArgs
 		mm.ghcli = newGithubClient(ctx, token)

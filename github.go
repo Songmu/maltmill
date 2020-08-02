@@ -4,14 +4,14 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/Songmu/gitconfig"
 	"github.com/google/go-github/github"
-	gitconfig "github.com/tcnksm/go-gitconfig"
 	"golang.org/x/oauth2"
 )
 
 func newGithubClient(ctx context.Context, token string) *github.Client {
 	if token == "" {
-		token, _ = gitconfig.GithubToken()
+		token, _ = gitconfig.GitHubToken("")
 	}
 	var oauthCli *http.Client
 	if token != "" {
