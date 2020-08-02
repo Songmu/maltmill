@@ -1,6 +1,7 @@
 package maltmill
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -17,8 +18,8 @@ const (
 )
 
 // Run the maltmill
-func Run(args []string) int {
-	err := (&cli{outStream: os.Stdout, errStream: os.Stderr}).run(args)
+func Run(ctx context.Context, args []string, outStream, errStream io.Writer) int {
+	err := (&cli{outStream: outStream, errStream: errStream}).run(ctx, args)
 	if err != nil {
 		if err == flag.ErrHelp || err == errOpt {
 			return exitCodeOK
@@ -38,23 +39,23 @@ type maltmill struct {
 	ghcli *github.Client
 }
 
-func (mm *maltmill) run() error {
-	eg := errgroup.Group{}
+func (mm *maltmill) run(ctx context.Context) error {
+	eg, ctx := errgroup.WithContext(ctx)
 	for _, f := range mm.files {
 		f := f
 		eg.Go(func() error {
-			return mm.processFile(f)
+			return mm.processFile(ctx, f)
 		})
 	}
 	return eg.Wait()
 }
 
-func (mm *maltmill) processFile(f string) error {
+func (mm *maltmill) processFile(ctx context.Context, f string) error {
 	fo, err := newFormula(f)
 	if err != nil {
 		return err
 	}
-	updated, err := fo.update(mm.ghcli)
+	updated, err := fo.update(ctx, mm.ghcli)
 	if err != nil {
 		return err
 	}

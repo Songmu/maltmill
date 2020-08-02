@@ -86,13 +86,12 @@ func expandStr(str string, m map[string]string) (string, error) {
 	return str, nil
 }
 
-func (fo *formula) update(ghcli *github.Client) (updated bool, err error) {
+func (fo *formula) update(ctx context.Context, ghcli *github.Client) (updated bool, err error) {
 	origVer, err := semver.NewVersion(fo.version)
 	if err != nil {
 		return false, errors.Wrap(err, "invalid original version")
 	}
 
-	ctx := context.Background()
 	rele, resp, err := ghcli.Repositories.GetLatestRelease(ctx, fo.owner, fo.repo)
 	if err != nil {
 		return false, errors.Wrapf(err, "update formula failed: %s", fo.fname)

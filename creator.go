@@ -96,7 +96,7 @@ func getDownloads(assets []github.ReleaseAsset) ([]formulaDownload, error) {
 	return downloads, nil
 }
 
-func (cr *creator) run() error {
+func (cr *creator) run(ctx context.Context) error {
 	ownerAndRepo := strings.Split(cr.slug, "/")
 	if len(ownerAndRepo) != 2 {
 		return errors.Errorf("invalid slug: %s", cr.slug)
