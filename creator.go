@@ -65,6 +65,33 @@ var formulaTmpl = template.Must(template.New("formulaTmpl").Parse(tmpl))
 
 var osNameRe = regexp.MustCompile("(darwin|linux)")
 
+func getDownloads(assets []github.ReleaseAsset) (map[string]formulaDownload, error) {
+	downloads := make(map[string]formulaDownload)
+	for _, asset := range assets {
+		u := asset.GetBrowserDownloadURL()
+		fname := path.Base(u)
+		if !strings.Contains(fname, "amd64") {
+			continue
+		}
+		osName := osNameRe.FindString(fname)
+		if osName == "" {
+			continue
+		}
+		digest, err := getSHA256FromURL(u)
+		if err != nil {
+			return nil, err
+		}
+		downloads[osName] = formulaDownload{
+			URL:    u,
+			SHA256: digest,
+		}
+	}
+	if len(downloads) == 0 {
+		return nil, errors.New("no assets found")
+	}
+	return downloads, nil
+}
+
 func (cr *creator) run() error {
 	ownerAndRepo := strings.Split(cr.slug, "/")
 	if len(ownerAndRepo) != 2 {
@@ -97,32 +124,7 @@ func (cr *creator) run() error {
 		return errors.Wrapf(err, "invalid tag name: %s", rele.GetTagName())
 	}
 	nf.Version = fmt.Sprintf("%d.%d.%d", ver.Major(), ver.Minor(), ver.Patch())
-	nf.Downloads, err = func() (map[string]formulaDownload, error) {
-		downloads := make(map[string]formulaDownload)
-		for _, asset := range rele.Assets {
-			u := asset.GetBrowserDownloadURL()
-			fname := path.Base(u)
-			if !strings.Contains(fname, "amd64") {
-				continue
-			}
-			osName := osNameRe.FindString(fname)
-			if osName == "" {
-				continue
-			}
-			digest, err := getSHA256FromURL(u)
-			if err != nil {
-				return nil, err
-			}
-			downloads[osName] = formulaDownload{
-				URL:    u,
-				SHA256: digest,
-			}
-		}
-		if len(downloads) == 0 {
-			return nil, errors.New("no assets found from latest release")
-		}
-		return downloads, nil
-	}()
+	nf.Downloads, err = getDownloads(rele.Assets)
 	if err != nil {
 		return err
 	}
