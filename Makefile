@@ -9,7 +9,7 @@ export GO111MODULE=on
 
 .PHONY: deps
 deps:
-	go get ${u} -d -v
+	go get ${u} -d -v -t
 
 .PHONY: devel-deps
 devel-deps: deps
@@ -48,4 +48,4 @@ crossbuild: CREDITS
 
 .PHONY: upload
 upload:
-	ghr v$(VERSION) dist/v$(VERSION)
+	ghr -body="$$(godzil changelog --latest -F markdown)" v$(VERSION) dist/v$(VERSION)
