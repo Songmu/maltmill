@@ -2,6 +2,7 @@ package maltmill
 
 import (
 	"bytes"
+	"context"
 	"io/ioutil"
 	"testing"
 )
@@ -12,11 +13,12 @@ func TestNew(t *testing.T) {
 		outStream: out,
 		errStream: ioutil.Discard,
 	}
-	rnr, err := cl.parseArgs([]string{"new", "Songmu/maltmill@v0.0.1"})
+	ctx := context.Background()
+	rnr, err := cl.parseArgs(ctx, []string{"new", "Songmu/maltmill@v0.0.1"})
 	if err != nil {
 		t.Errorf("error should be nil on parsing but: %s", err)
 	}
-	err = rnr.run()
+	err = rnr.run(ctx)
 	if err != nil {
 		t.Errorf("error should be nil but: %s", err)
 	}

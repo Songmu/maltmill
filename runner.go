@@ -1,5 +1,7 @@
 package maltmill
 
+import "context"
+
 type runner interface {
-	run() error
+	run(context.Context) error
 }

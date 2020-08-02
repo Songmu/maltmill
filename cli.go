@@ -1,6 +1,7 @@
 package maltmill
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -8,7 +9,6 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/Songmu/ghselfupdate"
 	"github.com/pkg/errors"
 )
 
@@ -20,20 +20,20 @@ type cli struct {
 	outStream, errStream io.Writer
 }
 
-func (cl *cli) run(args []string) error {
+func (cl *cli) run(ctx context.Context, args []string) error {
 	log.SetOutput(cl.errStream)
 	log.SetPrefix("[maltmill] ")
 	log.SetFlags(0)
 
-	mm, err := cl.parseArgs(args)
+	mm, err := cl.parseArgs(ctx, args)
 	if err != nil {
 		return err
 	}
-	return mm.run()
+	return mm.run(ctx)
 }
 
-func (cl *cli) parseArgs(args []string) (runner, error) {
-	mm := &maltmill{writer: cl.outStream}
+func (cl *cli) parseArgs(ctx context.Context, args []string) (runner, error) {
+	mm := &cmdMaltmill{writer: cl.outStream}
 	fs := flag.NewFlagSet("maltmill", flag.ContinueOnError)
 	fs.SetOutput(cl.errStream)
 	fs.Usage = func() {
@@ -77,25 +77,18 @@ Commands:
 		if mm.overwrite {
 			newArgs = append(newArgs, "-w")
 		}
-		return cl.parseCreatorArgs(append(newArgs, restArgs[1:]...))
+		return cl.parseCmdNewArgs(ctx, append(newArgs, restArgs[1:]...))
 	case "self-update":
-		return &updator{}, nil
+		return &cmdSelfUpdate{}, nil
 	default:
 		mm.files = restArgs
-		mm.ghcli = newGithubClient(token)
+		mm.ghcli = newGithubClient(ctx, token)
 		return mm, nil
 	}
 }
 
-type updator struct {
-}
-
-func (upd *updator) run() error {
-	return ghselfupdate.Do(version)
-}
-
-func (cl *cli) parseCreatorArgs(args []string) (runner, error) {
-	cr := &creator{writer: cl.outStream}
+func (cl *cli) parseCmdNewArgs(ctx context.Context, args []string) (runner, error) {
+	cr := &cmdNew{writer: cl.outStream}
 	fs := flag.NewFlagSet("maltmill", flag.ContinueOnError)
 	fs.SetOutput(cl.errStream)
 	fs.Usage = func() {
@@ -123,6 +116,6 @@ Options:
 		return nil, errors.New("githut repository isn't specified")
 	}
 	cr.slug = fs.Arg(0)
-	cr.ghcli = newGithubClient(token)
+	cr.ghcli = newGithubClient(ctx, token)
 	return cr, nil
 }
