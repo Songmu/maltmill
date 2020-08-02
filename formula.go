@@ -18,18 +18,15 @@ import (
 type formula struct {
 	fname string
 
-	content                    string
-	urlTmpl                    string
-	isURLTmpl                  bool
-	name, version, url, sha256 string
-	owner, repo                string
+	content       string
+	name, version string
+	owner, repo   string
 }
 
 var (
 	nameReg = regexp.MustCompile(`(?m)^\s+name\s*=\s*['"](.*)["']`)
 	verReg  = regexp.MustCompile(`(?m)(^\s+version\s*['"])(.*)(["'])`)
 	urlReg  = regexp.MustCompile(`(?m)(^\s+url\s*['"])(.*)(["'])`)
-	shaReg  = regexp.MustCompile(`(?m)(\s+sha256\s*['"])(.*)(["'])`)
 
 	parseURLReg = regexp.MustCompile(`^https://[^/]*github.com/([^/]+)/([^/]+)`)
 )
@@ -51,12 +48,6 @@ func newFormula(f string) (*formula, error) {
 	}
 	fo.version = m[2]
 
-	m = shaReg.FindStringSubmatch(fo.content)
-	if len(m) < 4 {
-		return nil, errors.New("no sha256 detected")
-	}
-	fo.sha256 = m[2]
-
 	info := map[string]string{
 		"name":    fo.name,
 		"version": fo.version,
@@ -66,21 +57,17 @@ func newFormula(f string) (*formula, error) {
 	if len(m) < 4 {
 		return nil, errors.New("no url detected")
 	}
-	fo.urlTmpl = m[2]
-	fo.isURLTmpl = strings.Contains(fo.urlTmpl, "#{version}")
-
-	if fo.isURLTmpl {
-		fo.url, err = expandStr(fo.urlTmpl, info)
+	url := m[2]
+	if strings.Contains(url, "#{version}") {
+		url, err = expandStr(url, info)
 		if err != nil {
 			return nil, err
 		}
-	} else {
-		fo.url = fo.urlTmpl
 	}
 
-	m = parseURLReg.FindStringSubmatch(fo.url)
+	m = parseURLReg.FindStringSubmatch(url)
 	if len(m) < 3 {
-		return nil, errors.Errorf("invalid url format: %s", fo.urlTmpl)
+		return nil, errors.Errorf("invalid url format: %s", url)
 	}
 	fo.owner = m[1]
 	fo.repo = m[2]
