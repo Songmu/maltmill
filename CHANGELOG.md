@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.5.6](https://github.com/Songmu/maltmill/compare/v0.5.5...v0.5.6) (2020-08-03)
+
+* update Makefile only [#27](https://github.com/Songmu/maltmill/pull/27) ([Songmu](https://github.com/Songmu))
+
 ## [v0.5.5](https://github.com/Songmu/maltmill/compare/v0.5.4...v0.5.5) (2020-08-03)
 
 * drop self-update feature [#26](https://github.com/Songmu/maltmill/pull/26) ([Songmu](https://github.com/Songmu))
