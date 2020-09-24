@@ -26,6 +26,8 @@ jobs:
         golint -set_exit_status ./...
     - name: test
       run: go test -coverprofile coverage.out -covermode atomic ./...
+      env:
+        GITHUB_TOKEN: ${{ secrets.github_token }}
     - name: Send coverage
       uses: shogo82148/actions-goveralls@v1
       with:
