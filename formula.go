@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/Masterminds/semver"
@@ -133,6 +134,13 @@ func (fo *formula) update(ctx context.Context, ghcli *github.Client) (updated bo
 }
 
 func (fo *formula) updateContent(from, to []formulaDownload) {
+	// Sort formulaDownloads by URL length in order to replace by longest match.
+	sort.Slice(from, func(i, j int) bool {
+		return len(from[i].URL) > len(from[j].URL)
+	})
+	sort.Slice(to, func(i, j int) bool {
+		return len(to[i].URL) > len(to[j].URL)
+	})
 	var replacements []string
 	for _, fromD := range from {
 		for _, toD := range to {

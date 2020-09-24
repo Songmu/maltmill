@@ -96,6 +96,33 @@ func TestUpdateContent(t *testing.T) {
 			Arch:   "amd64",
 		}},
 		expectFile: "testdata/kibelasync_update.rb",
+	}, {
+		name:    "partial matching url",
+		fname:   "testdata/ecspresso.rb",
+		version: "0.18.0",
+		fromDownloads: []formulaDownload{{
+			URL:    "https://github.com/kayac/ecspresso/releases/download/v0.17.3/ecspresso-v0.17.3-darwin-amd64",
+			SHA256: "1ac91503dcf2e7883b9df0d2a5b54c7c9a49e2d7b78f73286cfc19bb6ad44778",
+			OS:     "darwin",
+			Arch:   "amd64",
+		}, {
+			URL:    "https://github.com/kayac/ecspresso/releases/download/v0.17.3/ecspresso-v0.17.3-darwin-amd64.zip",
+			SHA256: "34684ce9b841eec0d30c809081bbf8269c1b9456301282fb54cf907d6687743d",
+			OS:     "darwin",
+			Arch:   "amd64",
+		}},
+		downloads: []formulaDownload{{
+			URL:    "https://github.com/kayac/ecspresso/releases/download/v0.18.0/ecspresso-v0.18.0-darwin-amd64",
+			SHA256: "44f7f90acf75ee38a18b50f5ff90de5b6d5ef8d3b639cf0942244a8a699e6aef",
+			OS:     "darwin",
+			Arch:   "amd64",
+		}, {
+			URL:    "https://github.com/kayac/ecspresso/releases/download/v0.18.0/ecspresso-v0.18.0-darwin-amd64.zip",
+			SHA256: "7fee5a7c401afd84e9b099aba37bea41572fd29731ddc3e4afe4bea4b3470a36",
+			OS:     "darwin",
+			Arch:   "amd64",
+		}},
+		expectFile: "testdata/ecspresso_update.rb",
 	}}
 
 	for _, tc := range testCases {
