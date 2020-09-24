@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.5.7](https://github.com/Songmu/maltmill/compare/v0.5.6...v0.5.7) (2020-09-24)
+
+* Sort formulaDownloads by URL length in order to replace by longest match [#28](https://github.com/Songmu/maltmill/pull/28) ([fujiwara](https://github.com/fujiwara))
+
 ## [v0.5.6](https://github.com/Songmu/maltmill/compare/v0.5.5...v0.5.6) (2020-08-03)
 
 * update Makefile only [#27](https://github.com/Songmu/maltmill/pull/27) ([Songmu](https://github.com/Songmu))
