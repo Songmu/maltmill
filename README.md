@@ -44,10 +44,10 @@ the Homebrew Formulae.
 % ghg get Songmu/maltmill
 ```
 
-### go get (for using HEAD)
+### go install (for using HEAD)
 
 ```console
-% go get github.com/Songmu/maltmill/cmd/maltmill
+% go install github.com/Songmu/maltmill/cmd/maltmill@main
 ```
 
 Built binaries are available on GitHub Releases.
