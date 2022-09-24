@@ -3,11 +3,11 @@ maltmill
 
 [![Build Status](https://travis-ci.org/Songmu/maltmill.png?branch=master)][travis]
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)][license]
-[![GoDoc](https://godoc.org/github.com/Songmu/maltmill?status.svg)][godoc]
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/Songmu/maltmill)][PkgGoDev]
 
 [travis]: https://travis-ci.org/Songmu/maltmill
 [license]: https://github.com/Songmu/maltmill/blob/master/LICENSE
-[godoc]: https://godoc.org/github.com/Songmu/maltmill
+[PkgGoDev]: https://pkg.go.dev/github.com/Songmu/maltmill
 
 create and update Homebrew thrid party Formulae
 
