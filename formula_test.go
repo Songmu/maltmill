@@ -1,7 +1,7 @@
 package maltmill
 
 import (
-	"io/ioutil"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -134,7 +134,7 @@ func TestUpdateContent(t *testing.T) {
 			fo.version = tc.version
 			fo.updateContent(tc.fromDownloads, tc.downloads)
 
-			b, _ := ioutil.ReadFile(tc.expectFile)
+			b, _ := os.ReadFile(tc.expectFile)
 			expect := string(b)
 
 			if fo.content != expect {
