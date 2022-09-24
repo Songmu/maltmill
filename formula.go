@@ -5,8 +5,8 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"regexp"
 	"sort"
 	"strings"
@@ -33,7 +33,7 @@ var (
 )
 
 func newFormula(f string) (*formula, error) {
-	b, err := ioutil.ReadFile(f)
+	b, err := os.ReadFile(f)
 	if err != nil {
 		return nil, err
 	}

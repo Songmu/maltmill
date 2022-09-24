@@ -3,7 +3,7 @@ package maltmill
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
+	"io"
 	"testing"
 )
 
@@ -11,7 +11,7 @@ func TestNew(t *testing.T) {
 	out := &bytes.Buffer{}
 	cl := &cli{
 		outStream: out,
-		errStream: ioutil.Discard,
+		errStream: io.Discard,
 	}
 	ctx := context.Background()
 	rnr, err := cl.parseArgs(ctx, []string{"new", "Songmu/maltmill@v0.0.1"})

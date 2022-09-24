@@ -1,11 +1,11 @@
 maltmill
 =======
 
-[![Build Status](https://travis-ci.org/Songmu/maltmill.png?branch=master)][travis]
+[![test](https://github.com/Songmu/maltmill/actions/workflows/test.yaml/badge.svg)][GitHub Actions]
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)][license]
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/Songmu/maltmill)][PkgGoDev]
 
-[travis]: https://travis-ci.org/Songmu/maltmill
+[GitHub Actions]: https://github.com/Songmu/maltmill/actions/workflows/test.yaml
 [license]: https://github.com/Songmu/maltmill/blob/master/LICENSE
 [PkgGoDev]: https://pkg.go.dev/github.com/Songmu/maltmill
 
@@ -44,10 +44,10 @@ the Homebrew Formulae.
 % ghg get Songmu/maltmill
 ```
 
-### go get (for using HEAD)
+### go install (for using HEAD)
 
 ```console
-% go get github.com/Songmu/maltmill/cmd/maltmill
+% go install github.com/Songmu/maltmill/cmd/maltmill@main
 ```
 
 Built binaries are available on GitHub Releases.
