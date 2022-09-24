@@ -1,0 +1,24 @@
+name: release
+description: release maltmill
+inputs:
+  tag:
+    description: tag name to be released
+    default: ''
+runs:
+  using: composite
+  steps:
+  - name: setup go
+    uses: actions/setup-go@v3
+    with:
+      go-version: 1.x
+  - name: build
+    run: |
+      make crossbuild
+    shell: bash
+  - name: upload
+    uses: softprops/action-gh-release@v1
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      files: dist/*
+      tag_name: ${{ inputs.tag }}
