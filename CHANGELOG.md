@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.5.8](https://github.com/Songmu/maltmill/compare/v0.5.7...v0.5.8) - 2022-09-24
+- Update go modules to build with go 1.19 by @k1LoW in https://github.com/Songmu/maltmill/pull/29
+- update releng by @Songmu in https://github.com/Songmu/maltmill/pull/30
+
 ## [v0.5.7](https://github.com/Songmu/maltmill/compare/v0.5.6...v0.5.7) (2020-09-24)
 
 * Sort formulaDownloads by URL length in order to replace by longest match [#28](https://github.com/Songmu/maltmill/pull/28) ([fujiwara](https://github.com/fujiwara))
