@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -75,7 +76,8 @@ func getDownloads(assets []github.ReleaseAsset) ([]formulaDownload, error) {
 	for _, asset := range assets {
 		u := asset.GetBrowserDownloadURL()
 		fname := path.Base(u)
-		if !strings.Contains(fname, "amd64") {
+		arch, ok := detectArch(fname)
+		if !ok {
 			continue
 		}
 		osName := osNameRe.FindString(fname)
@@ -90,13 +92,32 @@ func getDownloads(assets []github.ReleaseAsset) ([]formulaDownload, error) {
 			URL:    u,
 			SHA256: digest,
 			OS:     osName,
-			Arch:   "amd64",
+			Arch:   arch,
 		})
 	}
 	if len(downloads) == 0 {
 		return nil, errors.New("no assets found")
 	}
 	return downloads, nil
+}
+
+func detectArch(in string) (string, bool) {
+	archs := []string{"amd64", "arm64"}
+	for _, a := range archs {
+		if strings.Contains(in, a) {
+			return a, true
+		}
+	}
+	return "", false
+}
+
+func preferAmd64(in []formulaDownload) {
+	sort.SliceStable(in, func(i, j int) bool {
+		if in[i].Arch == "amd64" {
+			return true
+		}
+		return false
+	})
 }
 
 func (cr *cmdNew) run(ctx context.Context) (err error) {
@@ -135,9 +156,12 @@ func (cr *cmdNew) run(ctx context.Context) (err error) {
 	if err != nil {
 		return err
 	}
+	preferAmd64(downloads)
 	nf.Downloads = make(map[string]formulaDownload, len(downloads))
 	for _, d := range downloads {
-		nf.Downloads[d.OS] = d
+		if _, ok := nf.Downloads[d.OS]; !ok {
+			nf.Downloads[d.OS] = d
+		}
 	}
 	var wtr = cr.writer
 	if cr.overwrite || cr.outFile != "" {
