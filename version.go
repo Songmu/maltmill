@@ -1,5 +1,5 @@
 package maltmill
 
-const version = "0.5.8"
+const version = "1.0.0"
 
 var revision = "HEAD"
