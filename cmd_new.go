@@ -30,17 +30,40 @@ var _ runner = (*cmdNew)(nil)
 var tmpl = `class {{.CapitalizedName}} < Formula
   version '{{.Version}}'
   homepage 'https://github.com/{{.Owner}}/{{.Repo}}'
-  if OS.mac?
-    url "{{.Downloads.darwin.URL}}"
-    sha256 '{{.Downloads.darwin.SHA256}}'
+{{ if or (ne .Downloads.DarwinAmd64 nil) (ne .Downloads.DarwinArm64 nil) }}
+  on_macos
+{{- if .Downloads.DarwinArm64 }}
+    if Hardware::CPU.arm?
+      url '{{.Downloads.DarwinArm64.URL}}'
+      sha256 '{{.Downloads.DarwinArm64.SHA256}}'
+    end
+{{- end }}
+{{- if .Downloads.DarwinAmd64 }}
+    if Hardware::CPU.intel?
+      url '{{.Downloads.DarwinAmd64.URL}}'
+      sha256 '{{.Downloads.DarwinAmd64.SHA256}}'
+    end
+{{- end }}
   end
-  if OS.linux?
-    url "{{.Downloads.linux.URL}}"
-    sha256 '{{.Downloads.linux.SHA256}}'
+{{ end -}}
+{{ if or (ne .Downloads.LinuxAmd64 nil) (ne .Downloads.LinuxArm64 nil) }}
+  on_linux
+{{- if .Downloads.LinuxArm64 }}
+    if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
+      url '{{.Downloads.LinuxArm64.URL}}'
+      sha256 '{{.Downloads.LinuxArm64.SHA256}}'
+    end
+{{- end }}
+{{- if .Downloads.LinuxAmd64 }}
+    if Hardware::CPU.intel?
+      url '{{.Downloads.LinuxAmd64.URL}}'
+      sha256 '{{.Downloads.LinuxAmd64.SHA256}}'
+    end
+{{- end }}
   end
-  head 'https://github.com/{{.Owner}}/{{.Repo}}.git'
-
+{{ end }}
   head do
+    url 'https://github.com/{{.Owner}}/{{.Repo}}.git'
     depends_on 'go' => :build
   end
 
@@ -57,7 +80,14 @@ type formulaData struct {
 	Name, CapitalizedName string
 	Version               string
 	Owner, Repo           string
-	Downloads             map[string]formulaDownload
+	Downloads             formulaDataDownloads
+}
+
+type formulaDataDownloads struct {
+	DarwinAmd64 *formulaDownload
+	DarwinArm64 *formulaDownload
+	LinuxAmd64  *formulaDownload
+	LinuxArm64  *formulaDownload
 }
 
 type formulaDownload struct {
@@ -132,6 +162,7 @@ func (cr *cmdNew) run(ctx context.Context) (err error) {
 		Repo:            repoAndVer[0],
 		Name:            repoAndVer[0],
 		CapitalizedName: strings.Replace(strings.Title(repoAndVer[0]), "-", "", -1),
+		Downloads:       formulaDataDownloads{},
 	}
 	rele, resp, err := func() (*github.RepositoryRelease, *github.Response, error) {
 		if tag == "" {
@@ -153,11 +184,16 @@ func (cr *cmdNew) run(ctx context.Context) (err error) {
 	if err != nil {
 		return err
 	}
-	preferAmd64(downloads)
-	nf.Downloads = make(map[string]formulaDownload, len(downloads))
 	for _, d := range downloads {
-		if _, ok := nf.Downloads[d.OS]; !ok {
-			nf.Downloads[d.OS] = d
+		switch {
+		case d.OS == "darwin" && d.Arch == "amd64":
+			nf.Downloads.DarwinAmd64 = &d
+		case d.OS == "darwin" && d.Arch == "arm64":
+			nf.Downloads.DarwinArm64 = &d
+		case d.OS == "linux" && d.Arch == "amd64":
+			nf.Downloads.LinuxAmd64 = &d
+		case d.OS == "linux" && d.Arch == "arm64":
+			nf.Downloads.LinuxArm64 = &d
 		}
 	}
 	var wtr = cr.writer
