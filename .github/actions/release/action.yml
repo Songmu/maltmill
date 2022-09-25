@@ -4,6 +4,9 @@ inputs:
   tag:
     description: tag name to be released
     default: ''
+  token:
+    description: GitHub token
+    required: true
 runs:
   using: composite
   steps:
@@ -18,7 +21,7 @@ runs:
   - name: upload
     uses: softprops/action-gh-release@v1
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ inputs.token }}
     with:
       files: dist/*
       tag_name: ${{ inputs.tag }}
