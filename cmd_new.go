@@ -178,15 +178,16 @@ func (cr *cmdNew) run(ctx context.Context) (err error) {
 		return err
 	}
 	for _, d := range downloads {
+		dd := d
 		switch {
 		case d.OS == "darwin" && d.Arch == "amd64":
-			nf.Downloads.DarwinAmd64 = &d
+			nf.Downloads.DarwinAmd64 = &dd
 		case d.OS == "darwin" && d.Arch == "arm64":
-			nf.Downloads.DarwinArm64 = &d
+			nf.Downloads.DarwinArm64 = &dd
 		case d.OS == "linux" && d.Arch == "amd64":
-			nf.Downloads.LinuxAmd64 = &d
+			nf.Downloads.LinuxAmd64 = &dd
 		case d.OS == "linux" && d.Arch == "arm64":
-			nf.Downloads.LinuxArm64 = &d
+			nf.Downloads.LinuxArm64 = &dd
 		}
 	}
 	var wtr = cr.writer
