@@ -1,5 +1,9 @@
 # Changelog
 
+## [v1.0.1](https://github.com/Songmu/maltmill/compare/v1.0.0...v1.0.1) - 2022-09-25
+- fix actions/release/action.yml by @Songmu in https://github.com/Songmu/maltmill/pull/36
+- Fix formula template and handling by @k1LoW in https://github.com/Songmu/maltmill/pull/38
+
 ## [v1.0.0](https://github.com/Songmu/maltmill/compare/v0.5.8...v1.0.0) - 2022-09-25
 - Some updates to fit the current status of the maltmill by @k1LoW in https://github.com/Songmu/maltmill/pull/33
 - Support for arm64 assets by @k1LoW in https://github.com/Songmu/maltmill/pull/35
