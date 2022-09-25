@@ -8,7 +8,6 @@ import (
 	"os"
 	"path"
 	"regexp"
-	"sort"
 	"strings"
 	"text/template"
 
@@ -139,12 +138,6 @@ func detectArch(in string) (string, bool) {
 		}
 	}
 	return "", false
-}
-
-func preferAmd64(in []formulaDownload) {
-	sort.SliceStable(in, func(i, j int) bool {
-		return in[i].Arch == "amd64"
-	})
 }
 
 func (cr *cmdNew) run(ctx context.Context) (err error) {
