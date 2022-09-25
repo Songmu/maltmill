@@ -30,7 +30,7 @@ var tmpl = `class {{.CapitalizedName}} < Formula
   version '{{.Version}}'
   homepage 'https://github.com/{{.Owner}}/{{.Repo}}'
 {{ if or (ne .Downloads.DarwinAmd64 nil) (ne .Downloads.DarwinArm64 nil) }}
-  on_macos
+  on_macos do
 {{- if .Downloads.DarwinArm64 }}
     if Hardware::CPU.arm?
       url '{{.Downloads.DarwinArm64.URL}}'
@@ -46,7 +46,7 @@ var tmpl = `class {{.CapitalizedName}} < Formula
   end
 {{ end -}}
 {{ if or (ne .Downloads.LinuxAmd64 nil) (ne .Downloads.LinuxArm64 nil) }}
-  on_linux
+  on_linux do
 {{- if .Downloads.LinuxArm64 }}
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
       url '{{.Downloads.LinuxArm64.URL}}'

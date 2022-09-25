@@ -2,7 +2,7 @@ class Maltmill < Formula
   version '0.5.7'
   homepage 'https://github.com/Songmu/maltmill'
 
-  on_linux
+  on_linux do
     if Hardware::CPU.intel?
       url 'https://github.com/Songmu/maltmill/releases/download/v0.5.7/maltmill_v0.5.7_linux_amd64.tar.gz'
       sha256 '2af4eec3a80441e016514726efe630fac57ee30855b1f7c83f82c76e07f167e4'

@@ -26,14 +26,14 @@ func TestNew(t *testing.T) {
   version '0.0.1'
   homepage 'https://github.com/Songmu/maltmill'
 
-  on_macos
+  on_macos do
     if Hardware::CPU.intel?
       url 'https://github.com/Songmu/maltmill/releases/download/v0.0.1/maltmill_v0.0.1_linux_amd64.tar.gz'
       sha256 'c77dbf0053ca718172b506886f8cb55deab859d2a50598aa014959bae758e7b4'
     end
   end
 
-  on_linux
+  on_linux do
     if Hardware::CPU.intel?
       url 'https://github.com/Songmu/maltmill/releases/download/v0.0.1/maltmill_v0.0.1_linux_amd64.tar.gz'
       sha256 'c77dbf0053ca718172b506886f8cb55deab859d2a50598aa014959bae758e7b4'
