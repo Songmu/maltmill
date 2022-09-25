@@ -113,10 +113,7 @@ func detectArch(in string) (string, bool) {
 
 func preferAmd64(in []formulaDownload) {
 	sort.SliceStable(in, func(i, j int) bool {
-		if in[i].Arch == "amd64" {
-			return true
-		}
-		return false
+		return in[i].Arch == "amd64"
 	})
 }
 
