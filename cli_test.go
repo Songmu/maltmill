@@ -23,6 +23,7 @@ func TestNew(t *testing.T) {
 		t.Errorf("error should be nil but: %s", err)
 	}
 	expect := `class Maltmill < Formula
+  desc 'create and update Homebrew thrid party Formulae'
   version '0.0.1'
   homepage 'https://github.com/Songmu/maltmill'
 

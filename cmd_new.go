@@ -27,6 +27,9 @@ type cmdNew struct {
 var _ runner = (*cmdNew)(nil)
 
 var tmpl = `class {{.CapitalizedName}} < Formula
+{{- if .Desc }}
+  desc '{{.Desc}}'
+{{- end }}
   version '{{.Version}}'
   homepage 'https://github.com/{{.Owner}}/{{.Repo}}'
 {{ if or (ne .Downloads.DarwinAmd64 nil) (ne .Downloads.DarwinArm64 nil) }}
@@ -79,6 +82,7 @@ type formulaData struct {
 	Name, CapitalizedName string
 	Version               string
 	Owner, Repo           string
+	Desc                  string
 	Downloads             formulaDataDownloads
 }
 
@@ -157,12 +161,18 @@ func (cr *cmdNew) run(ctx context.Context) (err error) {
 		CapitalizedName: strings.Replace(strings.Title(repoAndVer[0]), "-", "", -1),
 		Downloads:       formulaDataDownloads{},
 	}
-	rele, resp, err := func() (*github.RepositoryRelease, *github.Response, error) {
+	repo, resp, err := cr.ghcli.Repositories.Get(ctx, nf.Owner, nf.Repo)
+	if err != nil {
+		return errors.Wrapf(err, "create new formula failed")
+	}
+	nf.Desc = repo.GetDescription()
+	resp.Body.Close()
+	rele, resp, err := func(ctx context.Context) (*github.RepositoryRelease, *github.Response, error) {
 		if tag == "" {
-			return cr.ghcli.Repositories.GetLatestRelease(context.Background(), nf.Owner, nf.Repo)
+			return cr.ghcli.Repositories.GetLatestRelease(ctx, nf.Owner, nf.Repo)
 		}
-		return cr.ghcli.Repositories.GetReleaseByTag(context.Background(), nf.Owner, nf.Repo, tag)
-	}()
+		return cr.ghcli.Repositories.GetReleaseByTag(ctx, nf.Owner, nf.Repo, tag)
+	}(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "create new formula failed")
 	}
