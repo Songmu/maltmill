@@ -44,6 +44,12 @@ the Homebrew Formulae.
 % ghg get Songmu/maltmill
 ```
 
+### using [aqua](https://aquaproj.github.io/)
+
+```console
+% aqua g -i Songmu/maltmill
+```
+
 ### go install (for using HEAD)
 
 ```console
