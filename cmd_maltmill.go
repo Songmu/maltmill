@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v74/github"
 	"golang.org/x/sync/errgroup"
 )
 

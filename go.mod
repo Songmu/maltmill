@@ -1,11 +1,11 @@
 module github.com/Songmu/maltmill
 
-go 1.19
+go 1.23.0
 
 require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/Songmu/gitconfig v0.2.0
-	github.com/google/go-github v17.0.0+incompatible
+	github.com/google/go-github/v74 v74.0.0
 	github.com/pkg/errors v0.9.1
 	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1
 	golang.org/x/sync v0.0.0-20220923202941-7f9b1623fab7

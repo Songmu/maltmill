@@ -7,7 +7,7 @@ endif
 
 .PHONY: deps
 deps:
-	go get ${u} -d -v -t
+	go get ${u} -v -t
 
 .PHONY: devel-deps
 devel-deps: deps
