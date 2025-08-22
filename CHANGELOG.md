@@ -1,5 +1,9 @@
 # Changelog
 
+## [v1.2.0](https://github.com/Songmu/maltmill/compare/v1.1.0...v1.2.0) - 2025-08-22
+- Use asset.Digest supplied by GitHub by @fujiwara in https://github.com/Songmu/maltmill/pull/43
+- docs: add the installation guide with aqua by @suzuki-shunsuke in https://github.com/Songmu/maltmill/pull/42
+
 ## [v1.1.0](https://github.com/Songmu/maltmill/compare/v1.0.1...v1.1.0) - 2022-09-26
 - Add `desc` when create formula by @k1LoW in https://github.com/Songmu/maltmill/pull/39
 
