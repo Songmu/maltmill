@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver"
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v74/github"
 	"github.com/pkg/errors"
 )
 

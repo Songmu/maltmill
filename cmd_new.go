@@ -12,7 +12,7 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/semver"
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v74/github"
 	"github.com/pkg/errors"
 )
 
@@ -104,7 +104,7 @@ var formulaTmpl = template.Must(template.New("formulaTmpl").Parse(tmpl))
 
 var osNameRe = regexp.MustCompile("(darwin|linux)")
 
-func getDownloads(assets []github.ReleaseAsset) ([]formulaDownload, error) {
+func getDownloads(assets []*github.ReleaseAsset) ([]formulaDownload, error) {
 	var downloads []formulaDownload
 	for _, asset := range assets {
 		u := asset.GetBrowserDownloadURL()
@@ -117,9 +117,16 @@ func getDownloads(assets []github.ReleaseAsset) ([]formulaDownload, error) {
 		if osName == "" {
 			continue
 		}
-		digest, err := getSHA256FromURL(u)
-		if err != nil {
-			return nil, err
+		var digest string
+		if asset.Digest != nil && strings.HasPrefix(*asset.Digest, "sha256:") {
+			// if it is not a sha256 digest, we need to calculate from URL
+			digest = strings.TrimPrefix(*asset.Digest, "sha256:")
+		} else {
+			var err error
+			digest, err = getSHA256FromURL(u)
+			if err != nil {
+				return nil, err
+			}
 		}
 		downloads = append(downloads, formulaDownload{
 			URL:    u,
