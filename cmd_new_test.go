@@ -120,6 +120,26 @@ func TestTmplExecute(t *testing.T) {
 			},
 			"testdata/tmpl_with_desc.rb",
 		},
+		{
+			"with desc quote",
+			&formulaData{
+				Desc:            "A CLI that's fast",
+				Owner:           "Songmu",
+				Repo:            "maltmill",
+				Name:            "maltmill",
+				Version:         "0.5.7",
+				CapitalizedName: "Maltmill",
+				Downloads: formulaDataDownloads{
+					DarwinAmd64: &formulaDownload{
+						URL:    "https://github.com/Songmu/maltmill/releases/download/v0.5.7/maltmill_v0.5.7_darwin_amd64.zip",
+						SHA256: "2af4eec3a80441e016514726efe630fac57ee30855b1f7c83f82c76e07f167e2",
+						OS:     "darwin",
+						Arch:   "amd64",
+					},
+				},
+			},
+			"testdata/tmpl_with_desc_quote.rb",
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
