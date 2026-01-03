@@ -28,7 +28,7 @@ var _ runner = (*cmdNew)(nil)
 
 var tmpl = `class {{.CapitalizedName}} < Formula
 {{- if .Desc }}
-  desc '{{.Desc | escapeDesc}}'
+  desc '{{.Desc | escapeSingleQuotes}}'
 {{- end }}
   version '{{.Version}}'
   homepage 'https://github.com/{{.Owner}}/{{.Repo}}'
@@ -100,7 +100,7 @@ type formulaDownload struct {
 	Arch   string
 }
 
-func escapeDescd(in string) string {
+func escapeSingleQuotes(in string) string {
 	if in == "" {
 		return ""
 	}
@@ -112,7 +112,7 @@ func escapeDescd(in string) string {
 
 var formulaTmpl = template.Must(
 	template.New("formulaTmpl").Funcs(template.FuncMap{
-		"escapeDesc": escapeDescd,
+		"escapeSingleQuotes": escapeSingleQuotes,
 	}).Parse(tmpl),
 )
 
