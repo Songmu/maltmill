@@ -28,7 +28,7 @@ var _ runner = (*cmdNew)(nil)
 
 var tmpl = `class {{.CapitalizedName}} < Formula
 {{- if .Desc }}
-  desc '{{.Desc}}'
+  desc '{{.Desc | escapeSingleQuotes}}'
 {{- end }}
   version '{{.Version}}'
   homepage 'https://github.com/{{.Owner}}/{{.Repo}}'
@@ -100,7 +100,21 @@ type formulaDownload struct {
 	Arch   string
 }
 
-var formulaTmpl = template.Must(template.New("formulaTmpl").Parse(tmpl))
+func escapeSingleQuotes(in string) string {
+	if in == "" {
+		return ""
+	}
+	// Escape backslashes first to avoid double escaping.
+	in = strings.ReplaceAll(in, "\\", "\\\\")
+	in = strings.ReplaceAll(in, "'", "\\'")
+	return in
+}
+
+var formulaTmpl = template.Must(
+	template.New("formulaTmpl").Funcs(template.FuncMap{
+		"escapeSingleQuotes": escapeSingleQuotes,
+	}).Parse(tmpl),
+)
 
 var osNameRe = regexp.MustCompile("(darwin|linux)")
 
