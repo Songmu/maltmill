@@ -1,5 +1,8 @@
 # Changelog
 
+## [v1.2.1](https://github.com/Songmu/maltmill/compare/v1.2.0...v1.2.1) - 2026-01-03
+- fix: new cmd with quote description by @jackchuka in https://github.com/Songmu/maltmill/pull/46
+
 ## [v1.2.0](https://github.com/Songmu/maltmill/compare/v1.1.0...v1.2.0) - 2025-08-22
 - Use asset.Digest supplied by GitHub by @fujiwara in https://github.com/Songmu/maltmill/pull/43
 - docs: add the installation guide with aqua by @suzuki-shunsuke in https://github.com/Songmu/maltmill/pull/42
