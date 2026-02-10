@@ -4,6 +4,8 @@ import (
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/google/go-github/v74/github"
 )
 
 func TestNewFormula(t *testing.T) {
@@ -24,6 +26,75 @@ func TestNewFormula(t *testing.T) {
 
 	if !reflect.DeepEqual(*fo, expect) {
 		t.Errorf("failed to getFormula.\n   out: %#v\nexpect: %#v", *fo, expect)
+	}
+}
+
+func TestParseTagName(t *testing.T) {
+	testCases := []struct {
+		name          string
+		tag           string
+		expectVersion string
+		expectPrefix  string
+		expectErr     bool
+	}{{
+		name:          "v prefix",
+		tag:           "v1.2.3",
+		expectVersion: "1.2.3",
+		expectPrefix:  "v",
+	}, {
+		name:          "product prefix",
+		tag:           "my-product-v0.8.1",
+		expectVersion: "0.8.1",
+		expectPrefix:  "my-product-v",
+	}, {
+		name:      "invalid tag",
+		tag:       "main",
+		expectErr: true,
+	}}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ver, prefix, err := parseTagName(tc.tag)
+			if tc.expectErr {
+				if err == nil {
+					t.Fatalf("error should not be nil for tag %q", tc.tag)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("error should be nil but: %s", err)
+			}
+			if ver.String() != tc.expectVersion {
+				t.Errorf("unexpected version. out=%s expect=%s", ver.String(), tc.expectVersion)
+			}
+			if prefix != tc.expectPrefix {
+				t.Errorf("unexpected prefix. out=%s expect=%s", prefix, tc.expectPrefix)
+			}
+		})
+	}
+}
+
+func TestSelectLatestReleaseByPrefix(t *testing.T) {
+	releases := []*github.RepositoryRelease{{
+		TagName: github.String("my-product-v1.1.0"),
+	}, {
+		TagName: github.String("other-v9.9.9"),
+	}, {
+		TagName: github.String("my-product-v1.4.0"),
+	}, {
+		TagName:    github.String("my-product-v1.5.0"),
+		Prerelease: github.Bool(true),
+	}}
+
+	rele, ver := selectLatestReleaseByPrefix(releases, "my-product-v")
+	if rele == nil || ver == nil {
+		t.Fatal("release and version should not be nil")
+	}
+	if rele.GetTagName() != "my-product-v1.4.0" {
+		t.Errorf("unexpected release. out=%s expect=%s", rele.GetTagName(), "my-product-v1.4.0")
+	}
+	if ver.String() != "1.4.0" {
+		t.Errorf("unexpected version. out=%s expect=%s", ver.String(), "1.4.0")
 	}
 }
 

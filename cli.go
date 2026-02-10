@@ -57,6 +57,7 @@ Commands:
 	var token string
 	fs.StringVar(&token, "token", os.Getenv(envGitHubToken), "github `token")
 	fs.BoolVar(&mm.overwrite, "w", false, "write result to (source) file instead of stdout")
+	fs.StringVar(&mm.tagPrefix, "tag-prefix", "v", "tag `prefix` used to select releases")
 
 	err := fs.Parse(args)
 	if err != nil {
@@ -76,6 +77,7 @@ Commands:
 		if mm.overwrite {
 			newArgs = append(newArgs, "-w")
 		}
+		newArgs = append(newArgs, "-tag-prefix", mm.tagPrefix)
 		return cl.parseCmdNewArgs(ctx, append(newArgs, restArgs[1:]...))
 	default:
 		mm.files = restArgs
@@ -104,6 +106,7 @@ Options:
 	fs.StringVar(&token, "token", os.Getenv(envGitHubToken), "github `token`")
 	fs.BoolVar(&cr.overwrite, "w", false, "write result to (source) file instead of stdout")
 	fs.StringVar(&cr.outFile, "o", "", "`file` to output")
+	fs.StringVar(&cr.tagPrefix, "tag-prefix", "v", "tag `prefix` used to select releases")
 
 	err := fs.Parse(args)
 	if err != nil {

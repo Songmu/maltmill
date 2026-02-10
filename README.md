@@ -23,6 +23,7 @@ create and update Homebrew thrid party Formulae
 
 ```console
 % maltmill -w maltmill.rb
+% maltmill -w --tag-prefix my-product-v my-product.rb
 ```
 
 ## Description

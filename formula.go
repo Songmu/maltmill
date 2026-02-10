@@ -22,6 +22,7 @@ type formula struct {
 	content       string
 	name, version string
 	owner, repo   string
+	tagPrefix     string
 }
 
 var (
@@ -29,7 +30,8 @@ var (
 	verReg  = regexp.MustCompile(`(?m)(^\s+version\s*['"])(.*)(["'])`)
 	urlReg  = regexp.MustCompile(`(?m)(^\s+url\s*['"])(.*)(["'])`)
 
-	parseURLReg = regexp.MustCompile(`^https://[^/]*github.com/([^/]+)/([^/]+)`)
+	parseURLReg   = regexp.MustCompile(`^https://[^/]*github.com/([^/]+)/([^/]+)`)
+	tagVersionReg = regexp.MustCompile(`^(.*?)(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)$`)
 )
 
 func newFormula(f string) (*formula, error) {
@@ -93,24 +95,14 @@ func (fo *formula) update(ctx context.Context, ghcli *github.Client) (updated bo
 		return false, errors.Wrap(err, "invalid original version")
 	}
 
-	rele, resp, err := ghcli.Repositories.GetLatestRelease(ctx, fo.owner, fo.repo)
+	rele, newVer, err := fo.findLatestRelease(ctx, ghcli)
 	if err != nil {
 		return false, errors.Wrapf(err, "update formula failed: %s", fo.fname)
-	}
-	resp.Body.Close()
-
-	newVer, err := semver.NewVersion(rele.GetTagName())
-	if err != nil {
-		return false, errors.Wrapf(err, "invalid original version. formula: %s", fo.fname)
 	}
 	if !origVer.LessThan(newVer) {
 		return false, nil
 	}
-
-	fromTag := fo.version
-	if strings.HasPrefix(rele.GetTagName(), "v") && !strings.HasPrefix(fromTag, "v") {
-		fromTag = "v" + fromTag
-	}
+	fromTag := fo.tagPrefix + fo.version
 	fromRele, resp, err := ghcli.Repositories.GetReleaseByTag(ctx, fo.owner, fo.repo, fromTag)
 	if err != nil {
 		return false, errors.Wrapf(err, "update formula failed: %s", fo.fname)
@@ -131,6 +123,76 @@ func (fo *formula) update(ctx context.Context, ghcli *github.Client) (updated bo
 	fo.updateContent(fromDownloads, downloads)
 
 	return true, nil
+}
+
+func parseTagName(tag string) (version *semver.Version, prefix string, err error) {
+	m := tagVersionReg.FindStringSubmatch(tag)
+	if len(m) < 3 {
+		return nil, "", errors.Errorf("invalid tag name: %s", tag)
+	}
+	version, err = semver.NewVersion(m[2])
+	if err != nil {
+		return nil, "", errors.Wrapf(err, "invalid tag name: %s", tag)
+	}
+	return version, m[1], nil
+}
+
+func selectLatestReleaseByPrefix(releases []*github.RepositoryRelease, prefix string) (*github.RepositoryRelease, *semver.Version) {
+	var latest *github.RepositoryRelease
+	var latestVer *semver.Version
+	for _, rele := range releases {
+		if rele.GetDraft() || rele.GetPrerelease() {
+			continue
+		}
+		ver, pfx, err := parseTagName(rele.GetTagName())
+		if err != nil {
+			continue
+		}
+		if pfx != prefix {
+			continue
+		}
+		if latest == nil || latestVer.LessThan(ver) {
+			latest = rele
+			latestVer = ver
+		}
+	}
+	return latest, latestVer
+}
+
+func findLatestReleaseByPrefix(ctx context.Context, ghcli *github.Client, owner, repo, prefix string) (*github.RepositoryRelease, *semver.Version, error) {
+	var (
+		latest    *github.RepositoryRelease
+		latestVer *semver.Version
+		opt       = &github.ListOptions{PerPage: 100}
+	)
+
+	for {
+		releases, resp, err := ghcli.Repositories.ListReleases(ctx, owner, repo, opt)
+		if resp != nil {
+			resp.Body.Close()
+		}
+		if err != nil {
+			return nil, nil, err
+		}
+		cand, candVer := selectLatestReleaseByPrefix(releases, prefix)
+		if cand != nil && (latest == nil || latestVer.LessThan(candVer)) {
+			latest = cand
+			latestVer = candVer
+		}
+		if resp == nil || resp.NextPage == 0 {
+			break
+		}
+		opt.Page = resp.NextPage
+	}
+
+	if latest == nil {
+		return nil, nil, errors.Errorf("no matching releases found for prefix %q", prefix)
+	}
+	return latest, latestVer, nil
+}
+
+func (fo *formula) findLatestRelease(ctx context.Context, ghcli *github.Client) (*github.RepositoryRelease, *semver.Version, error) {
+	return findLatestReleaseByPrefix(ctx, ghcli, fo.owner, fo.repo, fo.tagPrefix)
 }
 
 func (fo *formula) updateContent(from, to []formulaDownload) {

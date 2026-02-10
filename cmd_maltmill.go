@@ -13,6 +13,7 @@ import (
 type cmdMaltmill struct {
 	files     []string
 	overwrite bool
+	tagPrefix string
 
 	writer io.Writer
 
@@ -37,6 +38,7 @@ func (mm *cmdMaltmill) processFile(ctx context.Context, f string) error {
 	if err != nil {
 		return err
 	}
+	fo.tagPrefix = mm.tagPrefix
 	updated, err := fo.update(ctx, mm.ghcli)
 	if err != nil {
 		return err
