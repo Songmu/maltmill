@@ -26,6 +26,9 @@ create and update Homebrew thrid party Formulae
 % maltmill -w --tag-prefix my-product-v my-product.rb
 ```
 
+`--tag-prefix` is optional. If omitted, maltmill selects the latest release from
+plain semver tags (e.g. `1.2.3` / `v1.2.3`).
+
 ## Description
 
 The maltmill retrieve artifacts from GitHub Releases and create or update

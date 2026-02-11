@@ -101,12 +101,10 @@ func (fo *formula) update(ctx context.Context, ghcli *github.Client) (updated bo
 	if !origVer.LessThan(newVer) {
 		return false, nil
 	}
-	fromTag := fo.tagPrefix + fo.version
-	fromRele, resp, err := ghcli.Repositories.GetReleaseByTag(ctx, fo.owner, fo.repo, fromTag)
+	fromRele, err := getReleaseByVersionWithPrefix(ctx, ghcli, fo.owner, fo.repo, fo.version, fo.tagPrefix)
 	if err != nil {
 		return false, errors.Wrapf(err, "update formula failed: %s", fo.fname)
 	}
-	resp.Body.Close()
 
 	newVerStr := fmt.Sprintf("%d.%d.%d", newVer.Major(), newVer.Minor(), newVer.Patch())
 	fromDownloads, err := getDownloads(fromRele.Assets)
@@ -122,6 +120,26 @@ func (fo *formula) update(ctx context.Context, ghcli *github.Client) (updated bo
 	fo.updateContent(fromDownloads, downloads)
 
 	return true, nil
+}
+
+func getReleaseByVersionWithPrefix(ctx context.Context, ghcli *github.Client, owner, repo, version, prefix string) (*github.RepositoryRelease, error) {
+	tags := []string{prefix + version}
+	if prefix == "" {
+		tags = append(tags, "v"+version)
+	}
+
+	var lastErr error
+	for _, tag := range tags {
+		rele, resp, err := ghcli.Repositories.GetReleaseByTag(ctx, owner, repo, tag)
+		if resp != nil {
+			resp.Body.Close()
+		}
+		if err == nil {
+			return rele, nil
+		}
+		lastErr = err
+	}
+	return nil, lastErr
 }
 
 func parseTagVersionWithPrefix(tag, prefix string) (*semver.Version, error) {

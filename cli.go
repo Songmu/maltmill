@@ -57,7 +57,7 @@ Commands:
 	var token string
 	fs.StringVar(&token, "token", os.Getenv(envGitHubToken), "github `token")
 	fs.BoolVar(&mm.overwrite, "w", false, "write result to (source) file instead of stdout")
-	fs.StringVar(&mm.tagPrefix, "tag-prefix", "v", "tag `prefix` used to select releases")
+	fs.StringVar(&mm.tagPrefix, "tag-prefix", "", "tag `prefix` used to select releases")
 
 	err := fs.Parse(args)
 	if err != nil {
@@ -106,7 +106,7 @@ Options:
 	fs.StringVar(&token, "token", os.Getenv(envGitHubToken), "github `token`")
 	fs.BoolVar(&cr.overwrite, "w", false, "write result to (source) file instead of stdout")
 	fs.StringVar(&cr.outFile, "o", "", "`file` to output")
-	fs.StringVar(&cr.tagPrefix, "tag-prefix", "v", "tag `prefix` used to select releases")
+	fs.StringVar(&cr.tagPrefix, "tag-prefix", "", "tag `prefix` used to select releases")
 
 	err := fs.Parse(args)
 	if err != nil {

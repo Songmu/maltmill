@@ -42,6 +42,16 @@ func TestParseTagVersionWithPrefix(t *testing.T) {
 		prefix:        "v",
 		expectVersion: "1.2.3",
 	}, {
+		name:          "empty prefix with plain semver",
+		tag:           "1.2.3",
+		prefix:        "",
+		expectVersion: "1.2.3",
+	}, {
+		name:          "empty prefix with v semver",
+		tag:           "v1.2.3",
+		prefix:        "",
+		expectVersion: "1.2.3",
+	}, {
 		name:          "product prefix",
 		tag:           "my-product-v0.8.1",
 		prefix:        "my-product-v",
@@ -103,6 +113,29 @@ func TestSelectLatestReleaseByPrefix(t *testing.T) {
 	}
 	if ver.String() != "1.4.0" {
 		t.Errorf("unexpected version. out=%s expect=%s", ver.String(), "1.4.0")
+	}
+}
+
+func TestSelectLatestReleaseByPrefixWithEmptyPrefix(t *testing.T) {
+	releases := []*github.RepositoryRelease{{
+		TagName: github.String("1.1.0"),
+	}, {
+		TagName: github.String("v1.3.0"),
+	}, {
+		TagName: github.String("my-product-v9.9.9"),
+	}, {
+		TagName: github.String("1.2.0"),
+	}}
+
+	rele, ver := selectLatestReleaseByPrefix(releases, "")
+	if rele == nil || ver == nil {
+		t.Fatal("release and version should not be nil")
+	}
+	if rele.GetTagName() != "v1.3.0" {
+		t.Errorf("unexpected release. out=%s expect=%s", rele.GetTagName(), "v1.3.0")
+	}
+	if ver.String() != "1.3.0" {
+		t.Errorf("unexpected version. out=%s expect=%s", ver.String(), "1.3.0")
 	}
 }
 
