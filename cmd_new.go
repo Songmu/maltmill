@@ -202,7 +202,7 @@ func (cr *cmdNew) run(ctx context.Context) (err error) {
 		}
 	}
 
-	ver, _, err := parseTagName(rele.GetTagName())
+	ver, err := parseTagVersionWithPrefix(rele.GetTagName(), cr.tagPrefix)
 	if err != nil {
 		return errors.Wrapf(err, "invalid tag name: %s", rele.GetTagName())
 	}

@@ -30,8 +30,7 @@ var (
 	verReg  = regexp.MustCompile(`(?m)(^\s+version\s*['"])(.*)(["'])`)
 	urlReg  = regexp.MustCompile(`(?m)(^\s+url\s*['"])(.*)(["'])`)
 
-	parseURLReg   = regexp.MustCompile(`^https://[^/]*github.com/([^/]+)/([^/]+)`)
-	tagVersionReg = regexp.MustCompile(`^(.*?)(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)$`)
+	parseURLReg = regexp.MustCompile(`^https://[^/]*github.com/([^/]+)/([^/]+)`)
 )
 
 func newFormula(f string) (*formula, error) {
@@ -125,16 +124,15 @@ func (fo *formula) update(ctx context.Context, ghcli *github.Client) (updated bo
 	return true, nil
 }
 
-func parseTagName(tag string) (version *semver.Version, prefix string, err error) {
-	m := tagVersionReg.FindStringSubmatch(tag)
-	if len(m) < 3 {
-		return nil, "", errors.Errorf("invalid tag name: %s", tag)
+func parseTagVersionWithPrefix(tag, prefix string) (*semver.Version, error) {
+	if !strings.HasPrefix(tag, prefix) {
+		return nil, errors.Errorf("tag %q does not have prefix %q", tag, prefix)
 	}
-	version, err = semver.NewVersion(m[2])
+	version, err := semver.NewVersion(strings.TrimPrefix(tag, prefix))
 	if err != nil {
-		return nil, "", errors.Wrapf(err, "invalid tag name: %s", tag)
+		return nil, errors.Wrapf(err, "invalid tag name: %s", tag)
 	}
-	return version, m[1], nil
+	return version, nil
 }
 
 func selectLatestReleaseByPrefix(releases []*github.RepositoryRelease, prefix string) (*github.RepositoryRelease, *semver.Version) {
@@ -144,11 +142,8 @@ func selectLatestReleaseByPrefix(releases []*github.RepositoryRelease, prefix st
 		if rele.GetDraft() || rele.GetPrerelease() {
 			continue
 		}
-		ver, pfx, err := parseTagName(rele.GetTagName())
+		ver, err := parseTagVersionWithPrefix(rele.GetTagName(), prefix)
 		if err != nil {
-			continue
-		}
-		if pfx != prefix {
 			continue
 		}
 		if latest == nil || latestVer.LessThan(ver) {

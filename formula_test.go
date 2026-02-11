@@ -29,32 +29,43 @@ func TestNewFormula(t *testing.T) {
 	}
 }
 
-func TestParseTagName(t *testing.T) {
+func TestParseTagVersionWithPrefix(t *testing.T) {
 	testCases := []struct {
 		name          string
 		tag           string
+		prefix        string
 		expectVersion string
-		expectPrefix  string
 		expectErr     bool
 	}{{
 		name:          "v prefix",
 		tag:           "v1.2.3",
+		prefix:        "v",
 		expectVersion: "1.2.3",
-		expectPrefix:  "v",
 	}, {
 		name:          "product prefix",
 		tag:           "my-product-v0.8.1",
+		prefix:        "my-product-v",
 		expectVersion: "0.8.1",
-		expectPrefix:  "my-product-v",
+	}, {
+		name:      "too many version segments",
+		tag:       "v1.2.3.4",
+		prefix:    "v",
+		expectErr: true,
+	}, {
+		name:      "prefix mismatch",
+		tag:       "other-v1.2.3",
+		prefix:    "my-product-v",
+		expectErr: true,
 	}, {
 		name:      "invalid tag",
 		tag:       "main",
+		prefix:    "v",
 		expectErr: true,
 	}}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			ver, prefix, err := parseTagName(tc.tag)
+			ver, err := parseTagVersionWithPrefix(tc.tag, tc.prefix)
 			if tc.expectErr {
 				if err == nil {
 					t.Fatalf("error should not be nil for tag %q", tc.tag)
@@ -66,9 +77,6 @@ func TestParseTagName(t *testing.T) {
 			}
 			if ver.String() != tc.expectVersion {
 				t.Errorf("unexpected version. out=%s expect=%s", ver.String(), tc.expectVersion)
-			}
-			if prefix != tc.expectPrefix {
-				t.Errorf("unexpected prefix. out=%s expect=%s", prefix, tc.expectPrefix)
 			}
 		})
 	}
