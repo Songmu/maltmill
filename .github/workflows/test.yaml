@@ -3,9 +3,12 @@ on:
   push:
     branches:
     - "**"
+permissions:
+  contents: read
 jobs:
   test:
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
@@ -14,9 +17,11 @@ jobs:
         - macOS-latest
     steps:
     - name: checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+      with:
+        persist-credentials: false
     - name: setup go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@be3c94b385c4f180051c996d336f57a34c397495 # v3.6.1
       with:
         go-version-file: go.mod
     - name: test
@@ -24,4 +29,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.github_token }}
     - name: Send coverage
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@29386c70ef20e286228c72b668a06fd0e8399192 # v1.5.2
