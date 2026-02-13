@@ -7,6 +7,46 @@ import (
 	"testing"
 )
 
+func TestParseArgsTagPrefix(t *testing.T) {
+	cl := &cli{
+		outStream: io.Discard,
+		errStream: io.Discard,
+	}
+	ctx := context.Background()
+
+	rnr, err := cl.parseArgs(ctx, []string{"-tag-prefix", "my-product-v", "testdata/goxz.rb"})
+	if err != nil {
+		t.Fatalf("parseArgs should not fail but: %s", err)
+	}
+	mm, ok := rnr.(*cmdMaltmill)
+	if !ok {
+		t.Fatalf("runner should be *cmdMaltmill but: %T", rnr)
+	}
+	if mm.tagPrefix != "my-product-v" {
+		t.Errorf("unexpected tagPrefix. out=%s expect=%s", mm.tagPrefix, "my-product-v")
+	}
+}
+
+func TestParseArgsTagPrefixForNew(t *testing.T) {
+	cl := &cli{
+		outStream: io.Discard,
+		errStream: io.Discard,
+	}
+	ctx := context.Background()
+
+	rnr, err := cl.parseArgs(ctx, []string{"-tag-prefix", "tool-v", "new", "Songmu/maltmill"})
+	if err != nil {
+		t.Fatalf("parseArgs should not fail but: %s", err)
+	}
+	cr, ok := rnr.(*cmdNew)
+	if !ok {
+		t.Fatalf("runner should be *cmdNew but: %T", rnr)
+	}
+	if cr.tagPrefix != "tool-v" {
+		t.Errorf("unexpected tagPrefix. out=%s expect=%s", cr.tagPrefix, "tool-v")
+	}
+}
+
 func TestNew(t *testing.T) {
 	out := &bytes.Buffer{}
 	cl := &cli{

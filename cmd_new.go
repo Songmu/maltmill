@@ -11,7 +11,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/Masterminds/semver"
 	"github.com/google/go-github/v74/github"
 	"github.com/pkg/errors"
 )
@@ -21,6 +20,7 @@ type cmdNew struct {
 	slug      string
 	overwrite bool
 	outFile   string
+	tagPrefix string
 	ghcli     *github.Client
 }
 
@@ -188,18 +188,21 @@ func (cr *cmdNew) run(ctx context.Context) (err error) {
 	}
 	nf.Desc = repo.GetDescription()
 	resp.Body.Close()
-	rele, resp, err := func(ctx context.Context) (*github.RepositoryRelease, *github.Response, error) {
-		if tag == "" {
-			return cr.ghcli.Repositories.GetLatestRelease(ctx, nf.Owner, nf.Repo)
+	var rele *github.RepositoryRelease
+	if tag != "" {
+		rele, resp, err = cr.ghcli.Repositories.GetReleaseByTag(ctx, nf.Owner, nf.Repo, tag)
+		if err != nil {
+			return errors.Wrapf(err, "create new formula failed")
 		}
-		return cr.ghcli.Repositories.GetReleaseByTag(ctx, nf.Owner, nf.Repo, tag)
-	}(ctx)
-	if err != nil {
-		return errors.Wrapf(err, "create new formula failed")
+		resp.Body.Close()
+	} else {
+		rele, _, err = findLatestReleaseByPrefix(ctx, cr.ghcli, nf.Owner, nf.Repo, cr.tagPrefix)
+		if err != nil {
+			return errors.Wrapf(err, "create new formula failed")
+		}
 	}
-	resp.Body.Close()
 
-	ver, err := semver.NewVersion(rele.GetTagName())
+	ver, err := parseTagVersionWithPrefix(rele.GetTagName(), cr.tagPrefix)
 	if err != nil {
 		return errors.Wrapf(err, "invalid tag name: %s", rele.GetTagName())
 	}

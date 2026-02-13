@@ -4,6 +4,8 @@ import (
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/google/go-github/v74/github"
 )
 
 func TestNewFormula(t *testing.T) {
@@ -24,6 +26,116 @@ func TestNewFormula(t *testing.T) {
 
 	if !reflect.DeepEqual(*fo, expect) {
 		t.Errorf("failed to getFormula.\n   out: %#v\nexpect: %#v", *fo, expect)
+	}
+}
+
+func TestParseTagVersionWithPrefix(t *testing.T) {
+	testCases := []struct {
+		name          string
+		tag           string
+		prefix        string
+		expectVersion string
+		expectErr     bool
+	}{{
+		name:          "v prefix",
+		tag:           "v1.2.3",
+		prefix:        "v",
+		expectVersion: "1.2.3",
+	}, {
+		name:          "empty prefix with plain semver",
+		tag:           "1.2.3",
+		prefix:        "",
+		expectVersion: "1.2.3",
+	}, {
+		name:          "empty prefix with v semver",
+		tag:           "v1.2.3",
+		prefix:        "",
+		expectVersion: "1.2.3",
+	}, {
+		name:          "product prefix",
+		tag:           "my-product-v0.8.1",
+		prefix:        "my-product-v",
+		expectVersion: "0.8.1",
+	}, {
+		name:      "too many version segments",
+		tag:       "v1.2.3.4",
+		prefix:    "v",
+		expectErr: true,
+	}, {
+		name:      "prefix mismatch",
+		tag:       "other-v1.2.3",
+		prefix:    "my-product-v",
+		expectErr: true,
+	}, {
+		name:      "invalid tag",
+		tag:       "main",
+		prefix:    "v",
+		expectErr: true,
+	}}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ver, err := parseTagVersionWithPrefix(tc.tag, tc.prefix)
+			if tc.expectErr {
+				if err == nil {
+					t.Fatalf("error should not be nil for tag %q", tc.tag)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("error should be nil but: %s", err)
+			}
+			if ver.String() != tc.expectVersion {
+				t.Errorf("unexpected version. out=%s expect=%s", ver.String(), tc.expectVersion)
+			}
+		})
+	}
+}
+
+func TestSelectLatestReleaseByPrefix(t *testing.T) {
+	releases := []*github.RepositoryRelease{{
+		TagName: github.String("my-product-v1.1.0"),
+	}, {
+		TagName: github.String("other-v9.9.9"),
+	}, {
+		TagName: github.String("my-product-v1.4.0"),
+	}, {
+		TagName:    github.String("my-product-v1.5.0"),
+		Prerelease: github.Bool(true),
+	}}
+
+	rele, ver := selectLatestReleaseByPrefix(releases, "my-product-v")
+	if rele == nil || ver == nil {
+		t.Fatal("release and version should not be nil")
+	}
+	if rele.GetTagName() != "my-product-v1.4.0" {
+		t.Errorf("unexpected release. out=%s expect=%s", rele.GetTagName(), "my-product-v1.4.0")
+	}
+	if ver.String() != "1.4.0" {
+		t.Errorf("unexpected version. out=%s expect=%s", ver.String(), "1.4.0")
+	}
+}
+
+func TestSelectLatestReleaseByPrefixWithEmptyPrefix(t *testing.T) {
+	releases := []*github.RepositoryRelease{{
+		TagName: github.String("1.1.0"),
+	}, {
+		TagName: github.String("v1.3.0"),
+	}, {
+		TagName: github.String("my-product-v9.9.9"),
+	}, {
+		TagName: github.String("1.2.0"),
+	}}
+
+	rele, ver := selectLatestReleaseByPrefix(releases, "")
+	if rele == nil || ver == nil {
+		t.Fatal("release and version should not be nil")
+	}
+	if rele.GetTagName() != "v1.3.0" {
+		t.Errorf("unexpected release. out=%s expect=%s", rele.GetTagName(), "v1.3.0")
+	}
+	if ver.String() != "1.3.0" {
+		t.Errorf("unexpected version. out=%s expect=%s", ver.String(), "1.3.0")
 	}
 }
 
