@@ -1,5 +1,12 @@
 # Changelog
 
+## [v1.3.0](https://github.com/Songmu/maltmill/compare/v1.2.1...v1.3.0) - 2026-02-13
+- Make tag prefix configurable by `--tag-prefix` option by @KengoTODA in https://github.com/Songmu/maltmill/pull/48
+- Refine GitHub Action workflows for more secure by @Songmu in https://github.com/Songmu/maltmill/pull/50
+- Bump actions/checkout from 3.6.0 to 6.0.2 by @dependabot[bot] in https://github.com/Songmu/maltmill/pull/51
+- Bump actions/setup-go from 3.6.1 to 6.2.0 by @dependabot[bot] in https://github.com/Songmu/maltmill/pull/52
+- Bump codecov/codecov-action from 1.5.2 to 5.5.2 by @dependabot[bot] in https://github.com/Songmu/maltmill/pull/53
+
 ## [v1.2.1](https://github.com/Songmu/maltmill/compare/v1.2.0...v1.2.1) - 2026-01-03
 - fix: new cmd with quote description by @jackchuka in https://github.com/Songmu/maltmill/pull/46
 
