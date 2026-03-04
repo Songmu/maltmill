@@ -32,6 +32,9 @@ var tmpl = `class {{.CapitalizedName}} < Formula
 {{- end }}
   version '{{.Version}}'
   homepage 'https://github.com/{{.Owner}}/{{.Repo}}'
+{{- if .License }}
+  license '{{.License}}'
+{{- end }}
 {{ if or (ne .Downloads.DarwinAmd64 nil) (ne .Downloads.DarwinArm64 nil) }}
   on_macos do
 {{- if .Downloads.DarwinArm64 }}
@@ -83,6 +86,7 @@ type formulaData struct {
 	Version               string
 	Owner, Repo           string
 	Desc                  string
+	License               string
 	Downloads             formulaDataDownloads
 }
 
@@ -187,6 +191,9 @@ func (cr *cmdNew) run(ctx context.Context) (err error) {
 		return errors.Wrapf(err, "create new formula failed")
 	}
 	nf.Desc = repo.GetDescription()
+	if lic := repo.GetLicense(); lic != nil {
+		nf.License = lic.GetSPDXID()
+	}
 	resp.Body.Close()
 	var rele *github.RepositoryRelease
 	if tag != "" {
