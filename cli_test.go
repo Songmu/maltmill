@@ -66,6 +66,7 @@ func TestNew(t *testing.T) {
   desc 'create and update Homebrew thrid party Formulae'
   version '0.0.1'
   homepage 'https://github.com/Songmu/maltmill'
+  license 'MIT'
 
   on_macos do
     if Hardware::CPU.intel?
