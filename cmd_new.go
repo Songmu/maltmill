@@ -11,7 +11,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v84/github"
 	"github.com/pkg/errors"
 )
 
