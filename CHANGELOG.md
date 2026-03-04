@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.4.0](https://github.com/Songmu/maltmill/compare/v1.3.0...v1.4.0) - 2026-03-04
+- udpate README.md by @Songmu in https://github.com/Songmu/maltmill/pull/57
+- update deps by @Songmu in https://github.com/Songmu/maltmill/pull/59
+- Bump Songmu/tagpr from 1.15.0 to 1.17.1 by @dependabot[bot] in https://github.com/Songmu/maltmill/pull/55
+- Bump actions/setup-go from 6.2.0 to 6.3.0 by @dependabot[bot] in https://github.com/Songmu/maltmill/pull/56
+- add license field to generating formula by @Songmu in https://github.com/Songmu/maltmill/pull/60
+- add test do block to generated formula by @Songmu in https://github.com/Songmu/maltmill/pull/61
+
 ## [v1.3.0](https://github.com/Songmu/maltmill/compare/v1.2.1...v1.3.0) - 2026-02-13
 - Make tag prefix configurable by `--tag-prefix` option by @KengoTODA in https://github.com/Songmu/maltmill/pull/48
 - Refine GitHub Action workflows for more secure by @Songmu in https://github.com/Songmu/maltmill/pull/50
