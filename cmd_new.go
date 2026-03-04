@@ -78,6 +78,10 @@ var tmpl = `class {{.CapitalizedName}} < Formula
     end
     bin.install '{{.Name}}'
   end
+
+  test do
+    system "#{bin}/{{.Name}}", '-h'
+  end
 end
 `
 
