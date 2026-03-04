@@ -93,6 +93,10 @@ func TestNew(t *testing.T) {
     end
     bin.install 'maltmill'
   end
+
+  test do
+    system "#{bin}/maltmill", '-h'
+  end
 end
 `
 
