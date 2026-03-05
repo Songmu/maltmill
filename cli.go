@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"regexp"
 	"runtime"
 
 	"github.com/pkg/errors"
@@ -55,13 +56,22 @@ Commands:
 `)
 	}
 	var token string
+	var assetPatternStr string
 	fs.StringVar(&token, "token", os.Getenv(envGitHubToken), "github `token")
 	fs.BoolVar(&mm.overwrite, "w", false, "write result to (source) file instead of stdout")
 	fs.StringVar(&mm.tagPrefix, "tag-prefix", "", "tag `prefix` used to select releases")
+	fs.StringVar(&assetPatternStr, "asset", "", "regexp `pattern` to select release assets by filename")
 
 	err := fs.Parse(args)
 	if err != nil {
 		return nil, err
+	}
+
+	if assetPatternStr != "" {
+		mm.assetPattern, err = regexp.Compile(assetPatternStr)
+		if err != nil {
+			return nil, errors.Wrapf(err, "invalid asset pattern: %s", assetPatternStr)
+		}
 	}
 
 	restArgs := fs.Args()
@@ -78,6 +88,9 @@ Commands:
 			newArgs = append(newArgs, "-w")
 		}
 		newArgs = append(newArgs, "-tag-prefix", mm.tagPrefix)
+		if assetPatternStr != "" {
+			newArgs = append(newArgs, "-asset", assetPatternStr)
+		}
 		return cl.parseCmdNewArgs(ctx, append(newArgs, restArgs[1:]...))
 	default:
 		mm.files = restArgs
@@ -103,14 +116,22 @@ Options:
 		fs.PrintDefaults()
 	}
 	var token string
+	var assetPatternStr string
 	fs.StringVar(&token, "token", os.Getenv(envGitHubToken), "github `token`")
 	fs.BoolVar(&cr.overwrite, "w", false, "write result to (source) file instead of stdout")
 	fs.StringVar(&cr.outFile, "o", "", "`file` to output")
 	fs.StringVar(&cr.tagPrefix, "tag-prefix", "", "tag `prefix` used to select releases")
+	fs.StringVar(&assetPatternStr, "asset", "", "regexp `pattern` to select release assets by filename")
 
 	err := fs.Parse(args)
 	if err != nil {
 		return nil, err
+	}
+	if assetPatternStr != "" {
+		cr.assetPattern, err = regexp.Compile(assetPatternStr)
+		if err != nil {
+			return nil, errors.Wrapf(err, "invalid asset pattern: %s", assetPatternStr)
+		}
 	}
 	if len(fs.Args()) < 1 {
 		return nil, errors.New("githut repository isn't specified")

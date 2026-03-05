@@ -16,12 +16,13 @@ import (
 )
 
 type cmdNew struct {
-	writer    io.Writer
-	slug      string
-	overwrite bool
-	outFile   string
-	tagPrefix string
-	ghcli     *github.Client
+	writer       io.Writer
+	slug         string
+	overwrite    bool
+	outFile      string
+	tagPrefix    string
+	assetPattern *regexp.Regexp
+	ghcli        *github.Client
 }
 
 var _ runner = (*cmdNew)(nil)
@@ -126,11 +127,14 @@ var formulaTmpl = template.Must(
 
 var osNameRe = regexp.MustCompile("(darwin|linux)")
 
-func getDownloads(assets []*github.ReleaseAsset) ([]formulaDownload, error) {
+func getDownloads(assets []*github.ReleaseAsset, assetPattern *regexp.Regexp) ([]formulaDownload, error) {
 	var downloads []formulaDownload
 	for _, asset := range assets {
 		u := asset.GetBrowserDownloadURL()
 		fname := path.Base(u)
+		if assetPattern != nil && !assetPattern.MatchString(fname) {
+			continue
+		}
 		arch, ok := detectArch(fname)
 		if !ok {
 			continue
@@ -218,7 +222,7 @@ func (cr *cmdNew) run(ctx context.Context) (err error) {
 		return errors.Wrapf(err, "invalid tag name: %s", rele.GetTagName())
 	}
 	nf.Version = fmt.Sprintf("%d.%d.%d", ver.Major(), ver.Minor(), ver.Patch())
-	downloads, err := getDownloads(rele.Assets)
+	downloads, err := getDownloads(rele.Assets, cr.assetPattern)
 	if err != nil {
 		return err
 	}
