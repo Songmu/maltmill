@@ -57,7 +57,7 @@ Commands:
 	}
 	var token string
 	var assetPatternStr string
-	fs.StringVar(&token, "token", os.Getenv(envGitHubToken), "github `token")
+	fs.StringVar(&token, "token", os.Getenv(envGitHubToken), "github `token`")
 	fs.BoolVar(&mm.overwrite, "w", false, "write result to (source) file instead of stdout")
 	fs.StringVar(&mm.tagPrefix, "tag-prefix", "", "tag `prefix` used to select releases")
 	fs.StringVar(&assetPatternStr, "asset", "", "regexp `pattern` to select release assets by filename")
@@ -134,7 +134,7 @@ Options:
 		}
 	}
 	if len(fs.Args()) < 1 {
-		return nil, errors.New("githut repository isn't specified")
+		return nil, errors.New("github repository isn't specified")
 	}
 	cr.slug = fs.Arg(0)
 	cr.ghcli = newGithubClient(ctx, token)
