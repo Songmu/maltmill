@@ -47,6 +47,52 @@ func TestParseArgsTagPrefixForNew(t *testing.T) {
 	}
 }
 
+func TestParseArgsAssetPattern(t *testing.T) {
+	cl := &cli{
+		outStream: io.Discard,
+		errStream: io.Discard,
+	}
+	ctx := context.Background()
+
+	rnr, err := cl.parseArgs(ctx, []string{"-asset", `\.tar\.gz$`, "testdata/goxz.rb"})
+	if err != nil {
+		t.Fatalf("parseArgs should not fail but: %s", err)
+	}
+	mm, ok := rnr.(*cmdMaltmill)
+	if !ok {
+		t.Fatalf("runner should be *cmdMaltmill but: %T", rnr)
+	}
+	if mm.assetPattern == nil {
+		t.Fatal("assetPattern should not be nil")
+	}
+	if mm.assetPattern.String() != `\.tar\.gz$` {
+		t.Errorf("unexpected assetPattern. out=%s expect=%s", mm.assetPattern.String(), `\.tar\.gz$`)
+	}
+}
+
+func TestParseArgsAssetPatternForNew(t *testing.T) {
+	cl := &cli{
+		outStream: io.Discard,
+		errStream: io.Discard,
+	}
+	ctx := context.Background()
+
+	rnr, err := cl.parseArgs(ctx, []string{"-asset", `\.zip$`, "new", "Songmu/maltmill"})
+	if err != nil {
+		t.Fatalf("parseArgs should not fail but: %s", err)
+	}
+	cr, ok := rnr.(*cmdNew)
+	if !ok {
+		t.Fatalf("runner should be *cmdNew but: %T", rnr)
+	}
+	if cr.assetPattern == nil {
+		t.Fatal("assetPattern should not be nil")
+	}
+	if cr.assetPattern.String() != `\.zip$` {
+		t.Errorf("unexpected assetPattern. out=%s expect=%s", cr.assetPattern.String(), `\.zip$`)
+	}
+}
+
 func TestNew(t *testing.T) {
 	out := &bytes.Buffer{}
 	cl := &cli{

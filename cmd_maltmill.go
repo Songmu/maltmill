@@ -5,15 +5,17 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 
 	"github.com/google/go-github/v84/github"
 	"golang.org/x/sync/errgroup"
 )
 
 type cmdMaltmill struct {
-	files     []string
-	overwrite bool
-	tagPrefix string
+	files        []string
+	overwrite    bool
+	tagPrefix    string
+	assetPattern *regexp.Regexp
 
 	writer io.Writer
 
@@ -39,6 +41,7 @@ func (mm *cmdMaltmill) processFile(ctx context.Context, f string) error {
 		return err
 	}
 	fo.tagPrefix = mm.tagPrefix
+	fo.assetPattern = mm.assetPattern
 	updated, err := fo.update(ctx, mm.ghcli)
 	if err != nil {
 		return err

@@ -3,6 +3,8 @@ package maltmill
 import (
 	"os"
 	"reflect"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/google/go-github/v84/github"
@@ -301,6 +303,72 @@ func TestUpdateContent(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGetDownloadsWithAssetPattern(t *testing.T) {
+	assets := []*github.ReleaseAsset{{
+		BrowserDownloadURL: github.String("https://github.com/example/tool/releases/download/v1.0.0/tool_v1.0.0_darwin_amd64.tar.gz"),
+		Digest:             github.String("sha256:aaaa"),
+	}, {
+		BrowserDownloadURL: github.String("https://github.com/example/tool/releases/download/v1.0.0/tool_v1.0.0_darwin_amd64.zip"),
+		Digest:             github.String("sha256:bbbb"),
+	}, {
+		BrowserDownloadURL: github.String("https://github.com/example/tool/releases/download/v1.0.0/tool_v1.0.0_linux_amd64.tar.gz"),
+		Digest:             github.String("sha256:cccc"),
+	}, {
+		BrowserDownloadURL: github.String("https://github.com/example/tool/releases/download/v1.0.0/tool_v1.0.0_linux_amd64.zip"),
+		Digest:             github.String("sha256:dddd"),
+	}}
+
+	t.Run("no filter returns all", func(t *testing.T) {
+		downloads, err := getDownloads(assets, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(downloads) != 4 {
+			t.Errorf("expected 4 downloads, got %d", len(downloads))
+		}
+	})
+
+	t.Run("filter by tar.gz", func(t *testing.T) {
+		filter := regexp.MustCompile(`\.tar\.gz$`)
+		downloads, err := getDownloads(assets, filter)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(downloads) != 2 {
+			t.Errorf("expected 2 downloads, got %d", len(downloads))
+		}
+		for _, d := range downloads {
+			if !strings.HasSuffix(d.URL, ".tar.gz") {
+				t.Errorf("expected .tar.gz URL, got %s", d.URL)
+			}
+		}
+	})
+
+	t.Run("filter by zip", func(t *testing.T) {
+		filter := regexp.MustCompile(`\.zip$`)
+		downloads, err := getDownloads(assets, filter)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(downloads) != 2 {
+			t.Errorf("expected 2 downloads, got %d", len(downloads))
+		}
+		for _, d := range downloads {
+			if !strings.HasSuffix(d.URL, ".zip") {
+				t.Errorf("expected .zip URL, got %s", d.URL)
+			}
+		}
+	})
+
+	t.Run("filter matches nothing", func(t *testing.T) {
+		filter := regexp.MustCompile(`\.deb$`)
+		_, err := getDownloads(assets, filter)
+		if err == nil {
+			t.Error("expected error when no assets match filter")
+		}
+	})
 }
 
 func TestGetSHA256FromURL(t *testing.T) {

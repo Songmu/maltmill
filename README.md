@@ -70,6 +70,16 @@ If the repository uses prefixed tags (e.g. `my-product-v1.2.3`), use
 If `--tag-prefix` is omitted, maltmill selects the latest release from
 plain semver tags (e.g. `v1.2.3` or `1.2.3`).
 
+If a release contains non-archive assets such as `.rpm` or `.deb`
+packages alongside `.tar.gz` / `.zip` archives, maltmill may pick the
+wrong file. Use `-asset` to narrow down which assets to consider:
+
+```console
+% maltmill -w -asset '\.(tar\.gz|zip)$' my-tool.rb
+```
+
+The value is a Go regular expression matched against each asset filename.
+
 Without `-w`, the updated formula is printed to stdout.
 
 ## Install
@@ -116,6 +126,7 @@ credential helpers).
 | `-w` | Write the result back to the source file instead of stdout |
 | `-token` | GitHub API token (default: `$GITHUB_TOKEN`) |
 | `-tag-prefix` | Tag prefix used to select releases (e.g. `my-product-v`) |
+| `-asset` | Regexp pattern to select release assets by filename (e.g. `\.tar\.gz$`) |
 
 ### `new` subcommand options
 
@@ -125,6 +136,7 @@ credential helpers).
 | `-o` | Specify the output file path |
 | `-token` | GitHub API token (default: `$GITHUB_TOKEN`) |
 | `-tag-prefix` | Tag prefix used to select releases |
+| `-asset` | Regexp pattern to select release assets by filename |
 
 ## Author
 

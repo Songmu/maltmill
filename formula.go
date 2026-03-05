@@ -23,6 +23,7 @@ type formula struct {
 	name, version string
 	owner, repo   string
 	tagPrefix     string
+	assetPattern  *regexp.Regexp
 }
 
 var (
@@ -107,11 +108,11 @@ func (fo *formula) update(ctx context.Context, ghcli *github.Client) (updated bo
 	}
 
 	newVerStr := fmt.Sprintf("%d.%d.%d", newVer.Major(), newVer.Minor(), newVer.Patch())
-	fromDownloads, err := getDownloads(fromRele.Assets)
+	fromDownloads, err := getDownloads(fromRele.Assets, fo.assetPattern)
 	if err != nil {
 		return false, errors.Wrapf(err, "update formula failed: %s", fo.fname)
 	}
-	downloads, err := getDownloads(rele.Assets)
+	downloads, err := getDownloads(rele.Assets, fo.assetPattern)
 	if err != nil {
 		return false, errors.Wrapf(err, "update formula failed: %s", fo.fname)
 	}
