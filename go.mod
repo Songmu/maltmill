@@ -8,7 +8,7 @@ require (
 	github.com/google/go-github/v84 v84.0.0
 	github.com/pkg/errors v0.9.1
 	golang.org/x/oauth2 v0.35.0
-	golang.org/x/sync v0.19.0
+	golang.org/x/sync v0.20.0
 )
 
 require (
